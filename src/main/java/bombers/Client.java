@@ -5,16 +5,16 @@ import java.io.*;
 
 
 public class Client {
-	private DataInputStream input = null;
-	private DataOutputStream output = null;
-	private DataInputStream  toSend   = null; 
+	private BufferedReader input = null;
+	private PrintWriter output = null;
+	private BufferedReader toSend = null; 
 	
 	public class Reader extends Thread {
 		public void run() { 
 			String msg = "";
 			while(!msg.equals("exit")) {
 				try {
-					msg = new BufferedReader(new InputStreamReader(input)).readLine(); 
+					msg = input.readLine(); 
 					System.out.println(msg);
 				}catch(Exception i) {
 					System.out.println(i);
@@ -26,36 +26,29 @@ public class Client {
 	public class Sender extends Thread {
 		public void run() {
 			String msg = "";
-			while (!msg.equals("exit"))
+			while (!msg.equals("exit")) {
 				while (!(msg.equals("Send")||msg.equals("exit"))) { 
 					try
 					{ 
-						msg = new BufferedReader(new InputStreamReader(toSend)).readLine(); 
-						new BufferedWriter(new OutputStreamWriter(output)).write(msg);
+						msg = toSend.readLine(); 
+						output.println(msg);
 						System.out.println("printed out: " + msg);
-					}catch(IOException i) { 
+					} catch(IOException i) { 
 	                	System.out.println(i); 
 					}
-				}try {
-					output.flush();
-				}catch (IOException e) {
-					System.out.println(e);
 				}
+				output.flush();
+			}
 		}
 	}
 	
-	public Client(String destIP, int destPort) throws IOException, InterruptedException {
-		Socket socket = null;
-		System.out.println(".");
-
-		socket = new Socket();
-		socket.bind(new InetSocketAddress("0.0.0.0", 0));
-		socket.connect(new InetSocketAddress(destIP, destPort));
+	public Client(String destIp, int destPort) throws IOException, InterruptedException {
+		Socket socket = new Socket(destIp, destPort);
 		
 		System.out.println("Connection established.");
-		input = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-		output = new DataOutputStream(socket.getOutputStream()); 
-		toSend = new DataInputStream(System.in);
+		input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		output = new PrintWriter(socket.getOutputStream(), true); 
+		toSend = new BufferedReader(new InputStreamReader(System.in));
 		
 		Reader getter = new Reader();
 		getter.start();
@@ -72,7 +65,6 @@ public class Client {
 	
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Client a = new Client("0.0.0.0", 54791);
-	}
-	
+		Client a = new Client("127.0.0.1", 64798);
+	}	
 }

@@ -1,8 +1,11 @@
 package bombers;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,8 +16,8 @@ public class Server {
 	}
 	
 	private void start() throws IOException {
-		ServerSocket serverSocket = new ServerSocket();
-		serverSocket.bind(new InetSocketAddress("0.0.0.0",0));
+		ServerSocket serverSocket = new ServerSocket(0);
+		//serverSocket.bind(new InetSocketAddress("127.0.0.1",0));
 		try {
 			System.out.println(serverSocket.getInetAddress());
 			System.out.println("Server successfully started.\nServer listening at port " + serverSocket.getLocalPort());
@@ -22,8 +25,8 @@ public class Server {
 				Socket acceptedSocket = serverSocket.accept();
 				System.out.println("Connection established with new host.");
 				
-				OutputStream out = acceptedSocket.getOutputStream();
-				InputStream in = acceptedSocket.getInputStream();		
+				PrintWriter out = new PrintWriter(acceptedSocket.getOutputStream(), true);
+				BufferedReader in = new BufferedReader(new InputStreamReader(acceptedSocket.getInputStream()));
 				new Thread(new ClientHandler(in, out)).start();
 			}
 		} finally {
