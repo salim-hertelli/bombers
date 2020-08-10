@@ -1,5 +1,8 @@
+package bombers;
+
 import java.net.*; 
 import java.io.*; 
+
 
 public class Client {
 	private DataInputStream input = null;
@@ -45,7 +48,7 @@ public class Client {
 		System.out.println(".");
 
 		socket = new Socket();
-		socket.bind(new InetSocketAddress("192.168.137.89", 0));
+		socket.bind(new InetSocketAddress("192.168.137.1", 0));
 		socket.connect(new InetSocketAddress(destIP, destPort));
 		
 		System.out.println("Connection established.");
@@ -68,7 +71,7 @@ public class Client {
 	
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Client a = new Client("192.168.137.1", 53208);
+		Client a = new Client("192.168.137.89", 53208);
 	}
 	
 }
