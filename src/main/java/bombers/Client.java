@@ -32,7 +32,6 @@ public class Client {
 					{ 
 						msg = toSend.readLine(); 
 						output.println(msg);
-						System.out.println("printed out: " + msg);
 					} catch(IOException i) { 
 	                	System.out.println(i); 
 					}
@@ -44,6 +43,7 @@ public class Client {
 	
 	public Client(String destIp, int destPort) throws IOException, InterruptedException {
 		Socket socket = new Socket(destIp, destPort);
+		//socket.bind(new InetSocketAddress("192.168.137.1", 0));
 		
 		System.out.println("Connection established.");
 		input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -65,6 +65,6 @@ public class Client {
 	
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Client a = new Client("127.0.0.1", 64798);
+		Client a = new Client("192.168.137.89", 49746);
 	}	
 }
