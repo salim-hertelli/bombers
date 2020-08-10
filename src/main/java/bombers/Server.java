@@ -14,7 +14,7 @@ public class Server {
 	
 	private void start() throws IOException {
 		ServerSocket serverSocket = new ServerSocket();
-		serverSocket.bind(new InetSocketAddress("192.168.137.1",0));
+		serverSocket.bind(new InetSocketAddress("0.0.0.0",0));
 		try {
 			System.out.println(serverSocket.getInetAddress());
 			System.out.println("Server successfully started.\nServer listening at port " + serverSocket.getLocalPort());

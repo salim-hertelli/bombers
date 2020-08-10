@@ -14,7 +14,7 @@ public class Client {
 			String msg = "";
 			while(!msg.equals("exit")) {
 				try {
-					msg = input.readUTF(); 
+					msg = new BufferedReader(new InputStreamReader(input)).readLine(); 
 					System.out.println(msg);
 				}catch(Exception i) {
 					System.out.println(i);
@@ -30,8 +30,9 @@ public class Client {
 				while (!(msg.equals("Send")||msg.equals("exit"))) { 
 					try
 					{ 
-						msg = toSend.readUTF(); 
-						output.writeUTF(msg); 
+						msg = new BufferedReader(new InputStreamReader(toSend)).readLine(); 
+						new BufferedWriter(new OutputStreamWriter(output)).write(msg);
+						System.out.println("printed out: " + msg);
 					}catch(IOException i) { 
 	                	System.out.println(i); 
 					}
@@ -48,7 +49,7 @@ public class Client {
 		System.out.println(".");
 
 		socket = new Socket();
-		socket.bind(new InetSocketAddress("192.168.137.1", 0));
+		socket.bind(new InetSocketAddress("0.0.0.0", 0));
 		socket.connect(new InetSocketAddress(destIP, destPort));
 		
 		System.out.println("Connection established.");
@@ -71,7 +72,7 @@ public class Client {
 	
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Client a = new Client("192.168.137.89", 53208);
+		Client a = new Client("0.0.0.0", 54791);
 	}
 	
 }
