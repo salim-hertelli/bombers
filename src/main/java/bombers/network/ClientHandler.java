@@ -37,7 +37,7 @@ public class ClientHandler implements Runnable {
 			}
 			this.username = username;
 			clients.put(this.username, out);
-			
+			 
 			while (true) {
 				String nextLine = in.readLine();
 				if (nextLine.trim().equalsIgnoreCase("get")) {

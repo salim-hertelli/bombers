@@ -42,7 +42,7 @@ public class Tile {
 	public void setGraphicsContext(GraphicsContext gc) {
 		this.gc = gc;
 	}
-	
+	 
 	public TileType getTileType() {
 		return tileType;
 	}

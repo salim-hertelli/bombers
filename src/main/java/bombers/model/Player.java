@@ -36,7 +36,7 @@ public class Player {
 	}
 	
 	public void move() {
-		//TODO
+		//TODO 
 		// move has to update the ttl of the bombs 
 	}
 	

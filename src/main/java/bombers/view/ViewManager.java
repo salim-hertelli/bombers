@@ -42,7 +42,7 @@ public class ViewManager {
 	
 	public void repaintAll() {
 		for (Tile tile : map.getTiles()) {
-			tile.paint();
+			tile.paint(); 
 		}
 		//TODO: paints all tiles
 	}

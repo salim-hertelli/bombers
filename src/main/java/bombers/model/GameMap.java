@@ -22,7 +22,7 @@ public class GameMap {
 		this.yNumber = yNumber;
 		
 		generateTiles();
-	}
+	} 
 	
 	public int getTileHeight() {
 		return dimensions.getHeight() / yNumber;

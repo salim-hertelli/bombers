@@ -21,6 +21,6 @@
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-media</artifactId>
 			<version>14.0.1</version>
-		</dependency>
+		</dependency> 
   </dependencies>
 </project>
