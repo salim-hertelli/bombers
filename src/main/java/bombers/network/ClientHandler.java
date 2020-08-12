@@ -20,7 +20,7 @@ public class ClientHandler implements Runnable {
 	private static boolean usernameAvailable(String username) {
 		return !clients.containsKey(username);
 	}
-	
+	 
 	public void run() {
 		try {
 			out.println("Welcome to bombers chat server");
