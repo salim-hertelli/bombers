@@ -1,7 +1,7 @@
 package bombers.model;
 
 public class Bomb {
-	private int timeToLive = 999999;
+	private int timeToLive = 10;
 	private Player player;
 	
 	public Bomb(Player player) {

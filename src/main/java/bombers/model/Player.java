@@ -37,6 +37,7 @@ public class Player {
 	
 	public void move() {
 		//TODO
+		// move has to update the ttl of the bombs 
 	}
 	
 	public void dropBomb() {
@@ -51,11 +52,6 @@ public class Player {
 	// bomb detonated
 	public void removeBomb(Bomb bomb) {
 		bombs.remove(bomb);
-	}
-	
-	// for the gameboard to display bombs
-	public List<Bomb> getBombs() {
-		return bombs;
 	}
 	
 	public boolean isAlive() {
