@@ -1,13 +1,10 @@
-package bombers;
+package bombers.network;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class ClientHandler implements Runnable {
 	private static Map<String, PrintWriter> clients = new HashMap();
@@ -43,7 +40,14 @@ public class ClientHandler implements Runnable {
 			
 			while (true) {
 				String nextLine = in.readLine();
+				if (nextLine.trim().equalsIgnoreCase("get")) {
+					clients.forEach((name,out) -> {
+						out.println(name);
+					});
+					continue;
+				};
 				String message = java.time.LocalTime.now() + " " + this.username + ": " + nextLine;
+				System.out.println(message);
 				for (String otherUsername : clients.keySet()) {
 					if (!otherUsername.equals(this.username)) {
 						clients.get(otherUsername).println(message);
@@ -52,6 +56,10 @@ public class ClientHandler implements Runnable {
 			} 
 		} catch (IOException e1) {
 			e1.printStackTrace();
+		} finally {
+			System.out.println("Player " + username + " disconnected.");
+			out.close();
+			clients.remove(username);
 		}
 	}
 }

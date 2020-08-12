@@ -1,4 +1,4 @@
-package bombers;
+package bombers.network;
 
 import java.net.*; 
 import java.io.*; 
@@ -65,6 +65,10 @@ public class Client {
 	
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Client a = new Client("192.168.137.89", 49746);
+		if (args.length == 2) {
+			new Client(args[0], Integer.valueOf(args[1]));
+		} else {			
+			System.out.println("Usage: Client <ipAddress> <portNumber>");
+		}
 	}	
 }

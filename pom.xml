@@ -5,4 +5,12 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>bombers</name>
   <description>A clone of the game bombers</description>
+  
+    <dependencies>
+  	<dependency>
+    	<groupId>org.openjfx</groupId>
+    	<artifactId>javafx-controls</artifactId>
+    	<version>14</version>
+  	</dependency>
+  </dependencies>
 </project>
