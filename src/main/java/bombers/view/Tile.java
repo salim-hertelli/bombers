@@ -53,7 +53,6 @@ public class Tile {
 
 	public void paint() {
 		try {
-			System.out.println("I painted " + position.getX() + " " + position.getY());
 			Image image = new Image(new FileInputStream(tileType.getImagePath()));
 							
 			gc.drawImage(image, position.getX(), position.getY());
