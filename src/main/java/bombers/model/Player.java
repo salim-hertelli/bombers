@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import bombers.view.Tile;
+
 public class Player {
 	private static final int SPEED = 5; // numbers of pixels traveled in a single move
 	private static Dimensions dimensions = new Dimensions(25,25); //TODO set dimensions of the player
@@ -46,18 +48,23 @@ public class Player {
 	}
 	
 	public void move() {
-		//TODO 
-		// move has to update the ttl of the bombs
+		// If key was pressed player drops a bomb
 		if (wantsToDrop.get()) {
 			dropBomb();
 			wantsToDrop.set(false);
 		}
-		System.out.print("I was " + position + ", i have direction " + direction + ", new Position ");
+		
+		// update position of the player according to the direction
 		this.position.update(position.getX() + direction.getX() * SPEED, position.getY() + direction.getY() * SPEED);
-		System.out.println(position);
+		
+		// update (and explode) bombs
+		Bomb toRemove = null;
 		for (Bomb bomb : bombs) {
-			bomb.countDown();
+			if (bomb.countDown()) {
+				toRemove = bomb;
+			};
 		}
+		removeBomb(toRemove);
 	}
 	
 	private Position getCenterPosition() {
@@ -71,7 +78,11 @@ public class Player {
 	
 	private void dropBomb() {
 		if (bombs.size() < bombsLimit) {
-			new Bomb(this, map.getTileAtPosition(getCenterPosition()));
+			Tile dropTile = map.getTileAtPosition(getCenterPosition());
+			if (!dropTile.hasBomb()) {
+				Bomb newBomb = new Bomb(dropTile);
+				addBomb(newBomb);				
+			}
 		}
 	}
 	

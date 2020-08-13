@@ -10,15 +10,11 @@ import bombers.model.Player;
 import bombers.model.Position;
 import bombers.model.TileType;
 import bombers.view.ViewManager;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 public class GameBoard {
 	private final Dimensions dimensions = new Dimensions(750,750);

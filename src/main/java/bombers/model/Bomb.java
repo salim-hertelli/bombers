@@ -4,28 +4,22 @@ import bombers.view.Tile;
 
 public class Bomb {
 	private int timeToLive = 150;
-	private Player player;
 	private Tile tile;
 	
-	public Bomb(Player player, Tile tile) {
-		if (tile.hasBomb()) {
-			return;
-		}
-		this.player = player;
+	public Bomb(Tile tile) {
 		this.tile = tile;
 		tile.setBomb();
-		player.addBomb(this);
 	}
 	
-	public void countDown() {
+	/*
+	 * returns true if bomb explodes
+	 */
+	public boolean countDown() {
 		if (timeToLive-- == 0) {
-			detonate();
+			System.out.println("tile is " + tile);
+			tile.removeBomb();
+			return true;
 		}
-	}
-	
-	private void detonate() {
-		tile.removeBomb();
-		player.removeBomb(this);
-		//TODO destroy
+		return false;
 	}
 }
