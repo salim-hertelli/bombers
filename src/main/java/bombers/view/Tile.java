@@ -1,7 +1,6 @@
 package bombers.view;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 
 import bombers.model.Dimensions;
 import bombers.model.Position;
@@ -65,7 +64,6 @@ public class Tile {
 	}
 
 	public void paint() {
-<<<<<<< HEAD
 		Image image = null;
 		if (tileType == TileType.WALL) {
 			image = wallImage;
@@ -77,18 +75,6 @@ public class Tile {
 		
 		if (hasBomb) {
 			gc.drawImage(bombImage, position.getX(), position.getY());
-=======
-		try {
-			Image image = new Image(new FileInputStream(tileType.getImagePath()));
-							
-			gc.drawImage(image, position.getX(), position.getY());
-			
-			if (hasBomb) {
-				gc.drawImage(new Image(new FileInputStream(BOMB_FILE_PATH)), position.getX(), position.getY());
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
->>>>>>> 3172e271c5b44fcb4cff0e028fb6d4c01445c1ed
 		}
 	}
 }
