@@ -22,7 +22,7 @@ public class GameMap {
 		this.yNumber = yNumber;
 		
 		generateTiles();
-	} 
+	}
 	
 	public int getTileHeight() {
 		return dimensions.getHeight() / yNumber;
@@ -66,7 +66,19 @@ public class GameMap {
 		tiles[x][y].setTileType(type);
 	}
 	
+	/*
+	 * returns the tile whose index is (x,y)
+	 */
 	public Tile getTile(int x, int y) {
+		return tiles[x][y];
+	}
+	
+	/*
+	 * returns the tile to which the specified pixel belongs
+	 */
+	public Tile getTileAtPosition(Position position) {
+		int x = (int) position.getX() / getTileWidth();
+		int y = (int) position.getY() / getTileHeight();
 		return tiles[x][y];
 	}
 }

@@ -1,25 +1,29 @@
 package bombers.model;
 
 public class Position {
-	double x;
-	double y;
+	int x;
+	int y;
 	
 	public Position(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
 	
-	public double getX() {
+	public int getX() {
 		return x;
 	}
 	
-	public double getY() {
+	public int getY() {
 		return y;
 	}
 	
 	public void update(int x, int y) {
 		this.x = x;
 		this.y = y;
+	}
+	
+	public String toString() {
+		return "(" + x + "," + y + ")";
 	}
 }
  

@@ -11,6 +11,7 @@ import javafx.scene.layout.Pane;
 public class ViewManager {
     GameMap map;
     Scene scene;
+    private GraphicsContext gc;
     List<Player> players;
 
 	public ViewManager(GameMap map, List<Player> players) {
@@ -27,7 +28,7 @@ public class ViewManager {
 		Canvas canvas = new Canvas();
 		canvas.setWidth(map.getDimensions().getWidth());
 		canvas.setHeight(map.getDimensions().getHeight());
-		GraphicsContext gc = canvas.getGraphicsContext2D();
+		gc = canvas.getGraphicsContext2D();
 		
 		for (Tile tile : map.getTiles()) {
 			tile.setGraphicsContext(gc);
@@ -42,7 +43,10 @@ public class ViewManager {
 	
 	public void repaintAll() {
 		for (Tile tile : map.getTiles()) {
-			tile.paint(); 
+			tile.paint();
+		}
+		for (Player player : players) {
+			gc.fillRect(player.getPosition().getX(), player.getPosition().getY(),20,20);
 		}
 		//TODO: paints all tiles
 	}

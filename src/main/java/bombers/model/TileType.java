@@ -1,14 +1,7 @@
 package bombers.model;
 
+import javafx.scene.image.Image;
+
 public enum TileType {
-	FREE("src\\main\\java\\bombers\\view\\tile.png"), WALL("src\\main\\java\\bombers\\view\\wall.png");
-	String imagePath; 
-	
-	TileType(String imagePath) {
-		this.imagePath = imagePath;
-	}
-	
-	public String getImagePath() {
-		return this.imagePath;
-	}
+	FREE, WALL;
 }
