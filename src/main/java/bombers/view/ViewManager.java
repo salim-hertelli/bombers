@@ -1,14 +1,28 @@
 package bombers.view;
 
+import java.io.FileInputStream;
 import java.util.List;
 import bombers.model.GameMap;
 import bombers.model.Player;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 
 public class ViewManager {
+	private final static String PLAYER_FILE_PATH = "src\\main\\java\\bombers\\view\\player.png";
+	
+	private static Image playerImage;
+	
+	static {
+		try {
+			playerImage = new Image(new FileInputStream(PLAYER_FILE_PATH));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
     GameMap map;
     Scene scene;
     private GraphicsContext gc;
@@ -46,7 +60,7 @@ public class ViewManager {
 			tile.paint();
 		}
 		for (Player player : players) {
-			gc.fillRect(player.getPosition().getX(), player.getPosition().getY(),20,20);
+			gc.drawImage(playerImage, player.getPosition().getX(), player.getPosition().getY());
 		}
 		//TODO: paints all tiles
 	}

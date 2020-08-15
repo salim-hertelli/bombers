@@ -2,24 +2,28 @@ package bombers.model;
 
 import bombers.view.Tile;
 
-public class Bomb {
+public abstract class Bomb {
 	private int timeToLive = 150;
-	private Tile tile;
+	Tile tile;
+	GameMap map;
 	
-	public Bomb(Tile tile) {
+	public Bomb(Tile tile, GameMap map) {
 		this.tile = tile;
+		this.map = map;
 		tile.setBomb();
 	}
 	
 	/*
-	 * returns true if bomb explodes
+	 * returns true if bomb exploded
 	 */
 	public boolean countDown() {
 		if (timeToLive-- == 0) {
-			System.out.println("tile is " + tile);
 			tile.removeBomb();
+			explode();
 			return true;
 		}
 		return false;
 	}
+	
+	abstract void explode();
 }

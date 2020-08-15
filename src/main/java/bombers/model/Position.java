@@ -25,5 +25,17 @@ public class Position {
 	public String toString() {
 		return "(" + x + "," + y + ")";
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof Position)) {
+			return false;
+		}
+		Position other = (Position) obj;
+		return x == other.x && y == other.y;
+	}
 }
  

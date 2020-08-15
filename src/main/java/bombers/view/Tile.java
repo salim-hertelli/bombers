@@ -29,14 +29,16 @@ public class Tile {
 	
 	private GraphicsContext gc;
 	private Dimensions dimensions;
-	private Position position;
+	private Position pixelPosition; // this is the usual position
+	private Position gridPosition; // this is the coordinates of this tile in the map
 	private TileType tileType;
 	private boolean hasBomb;
 	
-	public Tile(Position position, Dimensions dimensions, TileType tileType) {
+	public Tile(Position pixelposition, Position gridPosition, Dimensions dimensions, TileType tileType) {
     	this.tileType = tileType;
     	this.dimensions = dimensions;
-    	this.position = position;
+    	this.gridPosition = gridPosition;
+    	this.pixelPosition = pixelposition;
 	}
 	
 	public void setTileType(TileType tileType) {
@@ -59,6 +61,14 @@ public class Tile {
 		return hasBomb;
 	}
 	
+	public Position getGridPosition() {
+		return gridPosition;
+	}
+	
+	public boolean isFree() {
+		return tileType == TileType.FREE;
+	}
+	
 	public void removeBomb() {
 		hasBomb = false;
 	}
@@ -71,10 +81,10 @@ public class Tile {
 			image = freeImage;
 		}
 						
-		gc.drawImage(image, position.getX(), position.getY());
+		gc.drawImage(image, pixelPosition.getX(), pixelPosition.getY());
 		
 		if (hasBomb) {
-			gc.drawImage(bombImage, position.getX(), position.getY());
+			gc.drawImage(bombImage, pixelPosition.getX(), pixelPosition.getY());
 		}
 	}
 }

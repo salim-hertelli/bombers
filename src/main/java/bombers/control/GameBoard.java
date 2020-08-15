@@ -8,18 +8,20 @@ import bombers.model.Direction;
 import bombers.model.GameMap;
 import bombers.model.Player;
 import bombers.model.Position;
-import bombers.model.TileType;
 import bombers.view.ViewManager;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class GameBoard {
+	private final String mapFilePath = "src\\main\\java\\bombers\\control\\map.txt";
 	private final Dimensions dimensions = new Dimensions(750,750);
-	private final int xNumber = 30;
-	private final int yNumber = 30;
 	private final int fps = 30;
 	
 	List<Player> players;
@@ -27,34 +29,44 @@ public class GameBoard {
 	ViewManager viewManager;
 	
 	public GameBoard(Stage primaryStage) {
-		GameMap map = setupGameMap(); //TODO
+		GameMap map = setupGameMap();
 		players = new LinkedList<>();
-		mainPlayer = new Player("grnvs", map, new Position(50,50));
+		mainPlayer = new Player("grnvs", map, new Position(100,100));
 		players.add(mainPlayer);
+		map.setPlayers(players);
 		
 		viewManager = new ViewManager(map, players);
 		Scene scene = viewManager.getScene();
 
+		setMainPlayerHandler(scene);
+		
+        primaryStage.setTitle("Bombers");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        mainLoop();
+	}
+
+	private GameMap setupGameMap() {
+		GameMap map = new GameMap(mapFilePath, dimensions, null);
+		return map;
+	}
+	
+	private void setMainPlayerHandler(Scene scene) {
 		scene.setOnKeyPressed(new EventHandler<KeyEvent> () {
-			Direction previous;
 			
 			public void handle(KeyEvent event) {
 				switch (event.getCode()) {
 				case UP: 
-					previous = Direction.UP;
-					mainPlayer.setDirection(previous);
+					mainPlayer.setDirection(Direction.UP);
 					break;
 				case DOWN: 				
-					previous = Direction.DOWN;
-					mainPlayer.setDirection(previous);
+					mainPlayer.setDirection(Direction.DOWN);
 					break;
 				case LEFT: 					
-					previous = Direction.LEFT;
-					mainPlayer.setDirection(previous);
+					mainPlayer.setDirection(Direction.LEFT);
 					break;
 				case RIGHT: 					
-					previous = Direction.RIGHT;
-					mainPlayer.setDirection(previous);
+					mainPlayer.setDirection(Direction.RIGHT);
 					break;
 				case SPACE:
 					mainPlayer.setWantsToDrop();
@@ -73,52 +85,27 @@ public class GameBoard {
 				}
 			}
         });
-		
-        primaryStage.setTitle("Bombers");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-        mainLoop();
-	}
-	
-	private GameMap setupGameMap() {
-		GameMap map = new GameMap(dimensions, xNumber, yNumber);
-		map.setTileType(2,2,TileType.WALL);
-		return map;
-	}
-	
-	class MainLoop implements Runnable {
-
-		Player mainPlayer;
-		ViewManager manager;
-		
-		public MainLoop(Player mainPlayer, ViewManager manager) {
-			this.mainPlayer = mainPlayer;
-			this.manager = manager;
-		}
-		
-		@Override
-		public void run() {
-			long start;
-			long toSleep;
-			while (true) {
-				System.out.println("im running");
-				start = System.currentTimeMillis();
-				mainPlayer.move();
-				viewManager.repaintAll();
-				System.out.println(System.currentTimeMillis() - start);
-				toSleep = 1000/fps - (System.currentTimeMillis() - start);
-				try {
-					Thread.sleep(toSleep);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}				
-			}
-		}
-		
 	}
 	
 	private void mainLoop() {
-		MainLoop loop = new MainLoop(mainPlayer, viewManager);
-		new Thread(loop).start();
+		// TODO make the fps change dynamically with a topFPSLimit being the constant "MainloopIteration"ps used by the server
+		Timeline timeline = new Timeline(new KeyFrame(Duration.millis(1000/fps), e-> {
+			// each player updates his bombs during his move
+			// thus the main loop does not explicitly update the bombs
+			for (Player player : players) {
+				player.move();
+			}
+			
+			// now after all the bombs got updated check which players died
+			for (Player player : players) {
+				if (!player.isAlive()) {
+					players.remove(player);
+				}
+			}
+			
+			viewManager.repaintAll();
+		} ));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
 	}
 }

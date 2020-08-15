@@ -1,27 +1,58 @@
 package bombers.model;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-
 import bombers.view.Tile;
 
+/*
+ * This class uses files that serve as a description of a game map
+ * The content of the file is parsed and the generated game map is
+ * accessible via getters and setters
+ */
 public class GameMap {
-	Tile[][] tiles;
-	private Dimensions dimensions;
-	private int xNumber;
-	private int yNumber;
+	private Tile[][] tiles;
+	private Dimensions dimensions; // dimensions of the map
+	private int xNumber; // number of tiles in a line
+	private int yNumber; // number of tiles in a column
+	private List<Player> players;
 	
-	/*
-	 * initializes all the tiles as FREE
-	 */
-	public GameMap(Dimensions dimensions, int xNumber, int yNumber) {
+	public GameMap(String fileName, Dimensions dimensions, List<Player> players) {
 		this.dimensions = dimensions;
-		this.xNumber = xNumber;
-		this.yNumber = yNumber;
 		
-		generateTiles();
+		List<String> lines = null;
+		try {
+			lines = Files.readAllLines(Paths.get(fileName));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		yNumber = lines.size();
+		xNumber = lines.get(0).length();
+		
+		generateTiles(lines);
+	}
+	
+	public void setPlayers(List<Player> players) {
+		this.players = players;
+	}
+	
+	public List<Player> getPlayers() {
+		return players;
+	}
+	
+	private TileType interpretTileTypeFromChar(char c) {
+		if (c == 'W') {
+			return TileType.WALL;
+		} else if (c == 'F') {
+			return TileType.FREE;
+		} else {
+			throw new IllegalArgumentException("Character not allowed in the game map file");
+		}
 	}
 	
 	public int getTileHeight() {
@@ -51,13 +82,15 @@ public class GameMap {
 		return list;
 	}
 	
-	private void generateTiles() {
-		tiles = new Tile[xNumber][yNumber];
-		for (int i = 0; i < xNumber; i++) {
-			for (int j = 0; j < yNumber; j++) {
-				Dimensions dimensions = getTileDimensions();
-				Position position = new Position(i * getTileWidth(), j * getTileHeight());
-				tiles[i][j] = new Tile(position, dimensions, TileType.FREE);
+	private void generateTiles(List<String> lines) {
+		tiles = new Tile[yNumber][xNumber];
+		for (int j = 0; j < yNumber; j++) {
+			String currentLine = lines.get(j);
+			for (int i = 0; i < xNumber; i++) {
+				Position tilePosition = new Position(i * getTileWidth(), j * getTileHeight());
+				TileType tileType = interpretTileTypeFromChar(currentLine.charAt(i));
+				Tile newTile = new Tile(tilePosition, new Position(i,j), getTileDimensions(), tileType);
+				tiles[i][j] = newTile;
 			}
 		}
 	}
@@ -73,6 +106,22 @@ public class GameMap {
 		return tiles[x][y];
 	}
 	
+	public Tile getRightNeighbor(Tile tile) {
+		return tiles[tile.getGridPosition().getX() + 1][tile.getGridPosition().getY()];
+	}
+	
+	public Tile getTopNeighbor(Tile tile) {
+		return tiles[tile.getGridPosition().getX()][tile.getGridPosition().getY() - 1];
+	}
+	
+	public Tile getBotNeighbor(Tile tile) {
+		return tiles[tile.getGridPosition().getX()][tile.getGridPosition().getY() + 1];
+	}
+	
+	public Tile getLeftNeighbor(Tile tile) {
+		return tiles[tile.getGridPosition().getX() - 1][tile.getGridPosition().getY()];
+	}
+	
 	/*
 	 * returns the tile to which the specified pixel belongs
 	 */
@@ -80,5 +129,22 @@ public class GameMap {
 		int x = (int) position.getX() / getTileWidth();
 		int y = (int) position.getY() / getTileHeight();
 		return tiles[x][y];
+	}
+	
+	public List<Player> getPlayersAtTile(Tile tile) {
+		List<Player> result = new LinkedList<>();
+		for (Player player : players) {
+			Position topLeft = player.getPosition();
+			Position lowRight = player.getLowRightCornerPosition();
+			Position topRight = new Position(lowRight.getX(), topLeft.getY());
+			Position lowLeft = new Position(topLeft.getX(), lowRight.getY());
+			if (getTileAtPosition(topLeft) == tile ||
+					getTileAtPosition(lowRight) == tile ||
+					getTileAtPosition(topRight) == tile ||
+					getTileAtPosition(lowLeft) == tile) {
+				result.add(player);
+			}
+		}
+		return result;
 	}
 }
