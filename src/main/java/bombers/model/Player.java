@@ -64,10 +64,10 @@ public class Player {
 		// update (and explode) bombs
 		Bomb toRemove = null;
 		for (Bomb bomb : bombs) {
-			if (bomb.countDown()) {
+			if (bomb.countDown().equals(BombState.EXPLODED)) {
 				toRemove = bomb;
 			};
-		}
+		}	
 		removeBomb(toRemove);
 	}
 	

@@ -3,7 +3,7 @@ package bombers.model;
 import bombers.view.Tile;
 
 public abstract class Bomb {
-	private int timeToLive = 150;
+	protected int timeToLive = 150;
 	Tile tile;
 	GameMap map;
 	
@@ -16,13 +16,17 @@ public abstract class Bomb {
 	/*
 	 * returns true if bomb exploded
 	 */
-	public boolean countDown() {
+	public BombState countDown() {
 		if (timeToLive-- == 0) {
 			tile.removeBomb();
 			explode();
-			return true;
+			return BombState.EXPLODED;
 		}
-		return false;
+		return BombState.DROPPED;
+	}
+	
+	public Tile getTile() {
+		return tile;
 	}
 	
 	abstract void explode();

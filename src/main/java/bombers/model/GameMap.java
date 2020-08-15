@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+
+import bombers.control.GameBoard;
 import bombers.view.Tile;
 
 /*
@@ -20,6 +22,7 @@ public class GameMap {
 	private int xNumber; // number of tiles in a line
 	private int yNumber; // number of tiles in a column
 	private List<Player> players;
+	private GameBoard gameBoard;
 	
 	public GameMap(String fileName, Dimensions dimensions, List<Player> players) {
 		this.dimensions = dimensions;
@@ -106,20 +109,28 @@ public class GameMap {
 		return tiles[x][y];
 	}
 	
-	public Tile getRightNeighbor(Tile tile) {
-		return tiles[tile.getGridPosition().getX() + 1][tile.getGridPosition().getY()];
+	public Tile getRightNeighbor(Tile tile, int n) {
+		if(tile.getGridPosition().getX() + n < tiles.length)
+			return tiles[tile.getGridPosition().getX() + n][tile.getGridPosition().getY()];
+		return null;
 	}
 	
-	public Tile getTopNeighbor(Tile tile) {
-		return tiles[tile.getGridPosition().getX()][tile.getGridPosition().getY() - 1];
+	public Tile getTopNeighbor(Tile tile, int n) {
+		if(tile.getGridPosition().getY() - n >= 0)
+			return tiles[tile.getGridPosition().getX()][tile.getGridPosition().getY() - n];
+		return null;
 	}
 	
-	public Tile getBotNeighbor(Tile tile) {
-		return tiles[tile.getGridPosition().getX()][tile.getGridPosition().getY() + 1];
-	}
+	public Tile getBotNeighbor(Tile tile, int n) {
+		if(tile.getGridPosition().getY() + n < tiles[0].length)
+			return tiles[tile.getGridPosition().getX()][tile.getGridPosition().getY() + n];
+		return null;
+		}
 	
-	public Tile getLeftNeighbor(Tile tile) {
-		return tiles[tile.getGridPosition().getX() - 1][tile.getGridPosition().getY()];
+	public Tile getLeftNeighbor(Tile tile, int n) {
+		if(tile.getGridPosition().getX() - n >= 0)
+			return tiles[tile.getGridPosition().getX() - n][tile.getGridPosition().getY()];
+		return null;
 	}
 	
 	/*
@@ -146,5 +157,17 @@ public class GameMap {
 			}
 		}
 		return result;
+	}
+	
+	public void setGameBoard(GameBoard gB) {
+		gameBoard = gB;
+	}
+	
+	public void addBombToExplode(ProgressiveBomb pb) {
+		gameBoard.addBombToExplode(pb);
+	}
+	
+	public void removeBombToExplode(ProgressiveBomb pb) {
+		gameBoard.explosionTerminated(pb);
 	}
 }

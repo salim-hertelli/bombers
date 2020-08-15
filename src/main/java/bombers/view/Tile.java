@@ -9,9 +9,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
 public class Tile {
-	private final static String BOMB_FILE_PATH = "src\\main\\java\\bombers\\view\\bomb.png";
-	private final static String FREE_TILE_FILE_PATH = "src\\main\\java\\bombers\\view\\tile.png";
-	private final static String WALL_TILE_FILE_PATH = "src\\main\\java\\bombers\\view\\wall.png";
+	private final static String BOMB_FILE_PATH = "src/main/java/bombers/view/bomb.png";
+	private final static String FREE_TILE_FILE_PATH = "src/main/java/bombers/view/tile.png";
+	private final static String WALL_TILE_FILE_PATH = "src/main/java/bombers/view/wall.png";
 	
 	private static Image freeImage;
 	private static Image wallImage;
@@ -82,7 +82,6 @@ public class Tile {
 		}
 						
 		gc.drawImage(image, pixelPosition.getX(), pixelPosition.getY());
-		
 		if (hasBomb) {
 			gc.drawImage(bombImage, pixelPosition.getX(), pixelPosition.getY());
 		}

@@ -1,71 +1,57 @@
 package bombers.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import bombers.view.Tile;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
 
 public class ProgressiveBomb extends Bomb{
-	private int lengthOfImpact = 5;
+	//private Timeline bombTimeline;
+	private int lengthOfImpact = 20;
+	private int step = 0;
+	private List<Integer> indexes = new ArrayList<>(); 
 	
 	public ProgressiveBomb(Tile tile, GameMap map) {
 		super(tile, map);
+		for (int i=0; i < 4;)
+	        indexes.add(i++);
 	}
-
-	@Override
-	void explode() {
-		// TODO this solution is not smart, find something better
-		Tile currentTile = tile;
-		int traveledDistance = 0;
-		do {
-			currentTile = map.getBotNeighbor(currentTile);
-			traveledDistance++;
-			for (Player player : map.getPlayersAtTile(currentTile)) {
-				player.kill();
-			};
-		} while (currentTile.isFree() && traveledDistance <= lengthOfImpact);
-		
-		if (!currentTile.isFree()) {
-			currentTile.setTileType(TileType.FREE);
+	
+	public BombState countDown() {
+		if(timeToLive-- == -lengthOfImpact){
+			explode();
+			return BombState.EXPLODED;
+		}else if(timeToLive < 0){
+			explode();
+			return BombState.EXPLODING;
+		}else if (timeToLive == 0) {
+			tile.removeBomb();
+			return BombState.EXPLODING;
 		}
-		
-		currentTile = tile;
-		traveledDistance = 0;
-		do {
-			currentTile = map.getLeftNeighbor(currentTile);
-			traveledDistance++;
-			for (Player player : map.getPlayersAtTile(currentTile)) {
-				player.kill();
-			};
-		} while (currentTile.isFree() && traveledDistance <= lengthOfImpact);
-		
-		if (!currentTile.isFree()) {
-			currentTile.setTileType(TileType.FREE);
+		return BombState.DROPPED;
+	}
+	
+	public void explode() {
+		Tile[] toDestroy = { map.getLeftNeighbor(tile, step), map.getBotNeighbor(tile, step), map.getRightNeighbor(tile, step), map.getTopNeighbor(tile, step)};
+		for(int j:indexes) {
+			if(j >= 0 && toDestroy[j] != null && toDestroy[j].getTileType().isDestructible()) {
+				Tile t = toDestroy[j];
+				for (Player player : map.getPlayersAtTile(t)) 
+					player.kill();
+				if (!t.isFree()) { 
+					t.setTileType(TileType.FREE);
+					indexes.set(indexes.indexOf(j), -1);
+				}
+			}else {
+				indexes.set(indexes.indexOf(j), -1);
+			}
 		}
-		
-		currentTile = tile;
-		traveledDistance = 0;
-		do {
-			currentTile = map.getRightNeighbor(currentTile);
-			traveledDistance++;
-			for (Player player : map.getPlayersAtTile(currentTile)) {
-				player.kill();
-			};
-		} while (currentTile.isFree() && traveledDistance <= lengthOfImpact);
-		
-		if (!currentTile.isFree()) {
-			currentTile.setTileType(TileType.FREE);
-		}
-		
-		currentTile = tile;
-		traveledDistance = 0;
-		do {
-			currentTile = map.getTopNeighbor(currentTile);
-			traveledDistance++;
-			for (Player player : map.getPlayersAtTile(currentTile)) {
-				player.kill();
-			};
-		} while (currentTile.isFree() && traveledDistance <= lengthOfImpact);
-		
-		if (!currentTile.isFree()) {
-			currentTile.setTileType(TileType.FREE);
-		}
+		step++;
+		if(step == lengthOfImpact) 
+			map.removeBombToExplode(this);
 	}
 }
