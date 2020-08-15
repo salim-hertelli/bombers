@@ -1,16 +1,21 @@
 package bombers.model;
 
-import javafx.scene.image.Image;
-
 public enum TileType {
-	FREE, WALL;
-	private boolean isDestructible = true;
+	FREE(false, false), WALL(true, true), OBSTACLE(false, true);
 	
-	public void setDestructible(boolean isDestructible) {
+	private boolean isDestructible;
+	private boolean blocksBombPropagation;
+	
+	TileType(boolean isDestructible, boolean blocksBombPropagation) {
 		this.isDestructible = isDestructible;
+		this.blocksBombPropagation = blocksBombPropagation;
 	}
 	
-	public boolean isDestructible() {
+	public boolean getIsDestructible() {
 		return isDestructible;
+	}
+	
+	public boolean blocksBombPropagation() {
+		return blocksBombPropagation;
 	}
 }
