@@ -1,10 +1,16 @@
 package bombers.view;
 
 import java.io.FileInputStream;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 import bombers.model.Dimensions;
 import bombers.model.Position;
 import bombers.model.TileType;
+import bombers.model.supplies.Bonus;
+import bombers.model.supplies.ExtraBomb;
+import bombers.model.supplies.Nitro;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
@@ -27,12 +33,15 @@ public class Tile {
 		}
 	}
 	
+	private List<Class<? extends Bonus>> supplies = Arrays.asList(bombers.model.supplies.ExtraBomb.class, bombers.model.supplies.Nitro.class);
 	private GraphicsContext gc;
 	private Dimensions dimensions;
 	private Position pixelPosition; // this is the usual position
 	private Position gridPosition; // this is the coordinates of this tile in the map
 	private TileType tileType;
 	private boolean hasBomb;
+	private boolean hasBonus;
+	private Bonus bonus;
 	
 	public Tile(Position pixelposition, Position gridPosition, Dimensions dimensions, TileType tileType) {
     	this.tileType = tileType;
@@ -43,6 +52,16 @@ public class Tile {
 	
 	public void setTileType(TileType tileType) {
 		this.tileType = tileType;
+		if(tileType.equals(TileType.BONUS)) {
+			hasBonus = true;
+			try {
+			    bonus = new Nitro(this);
+			    //I used this to pick a bonus randomly, but since I added an argument to the constructor it doesnt work anymore.
+			    //supplies.get(new Random().nextInt(supplies.size())).newInstance();    
+			}catch(Exception e){
+				System.err.println("Can't add bonus in " + gridPosition);
+			}
+		}	
 	}
 	
 	public void setBomb() {
@@ -65,19 +84,27 @@ public class Tile {
 		return gridPosition;
 	}
 	
+	public Position getPixelPosition() {
+		return pixelPosition;
+	}
+	
 	public boolean isFree() {
-		return tileType == TileType.FREE;
+		return tileType == TileType.FREE || tileType == TileType.BONUS;
 	}
 	
 	public void removeBomb() {
 		hasBomb = false;
+	}
+	
+	public Bonus getBonus() {
+		return bonus;
 	}
 
 	public void paint() {
 		Image image = null;
 		if (tileType == TileType.WALL) {
 			image = wallImage;
-		} else if (tileType == TileType.FREE) {
+		} else if (tileType == TileType.FREE || tileType == TileType.BONUS) {
 			image = freeImage;
 		}
 						

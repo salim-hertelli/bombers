@@ -26,7 +26,7 @@ import javafx.util.Duration;
 public class GameBoard {
 	private final String mapFilePath = "src/main/java/bombers/control/map.txt";
 	private final Dimensions dimensions = new Dimensions(750,750);
-	private final int fps = 30;
+	private final int fps = 60;
 	
 	List<Player> players;
 	Player mainPlayer;
@@ -109,6 +109,7 @@ public class GameBoard {
 			// thus the main loop does not explicitly update the bombs
 			for (Player player : players) {
 				player.move();
+				System.out.println(player.getPosition());
 			}
 			
 			// now after all the bombs got updated check which players died

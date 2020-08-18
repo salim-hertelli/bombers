@@ -111,25 +111,25 @@ public class GameMap {
 	
 	public Tile getRightNeighbor(Tile tile, int n) {
 		if(tile.getGridPosition().getX() + n < tiles.length)
-			return tiles[tile.getGridPosition().getX() + n][tile.getGridPosition().getY()];
+			return tiles[(int) (tile.getGridPosition().getX() + n)][(int) tile.getGridPosition().getY()];
 		return null;
 	}
 	
 	public Tile getTopNeighbor(Tile tile, int n) {
 		if(tile.getGridPosition().getY() - n >= 0)
-			return tiles[tile.getGridPosition().getX()][tile.getGridPosition().getY() - n];
+			return tiles[(int) tile.getGridPosition().getX()][(int) (tile.getGridPosition().getY() - n)];
 		return null;
 	}
 	
 	public Tile getBotNeighbor(Tile tile, int n) {
 		if(tile.getGridPosition().getY() + n < tiles[0].length)
-			return tiles[tile.getGridPosition().getX()][tile.getGridPosition().getY() + n];
+			return tiles[(int) tile.getGridPosition().getX()][(int) (tile.getGridPosition().getY() + n)];
 		return null;
 		}
 	
 	public Tile getLeftNeighbor(Tile tile, int n) {
 		if(tile.getGridPosition().getX() - n >= 0)
-			return tiles[tile.getGridPosition().getX() - n][tile.getGridPosition().getY()];
+			return tiles[(int) (tile.getGridPosition().getX() - n)][(int) tile.getGridPosition().getY()];
 		return null;
 	}
 	
@@ -137,8 +137,8 @@ public class GameMap {
 	 * returns the tile to which the specified pixel belongs
 	 */
 	public Tile getTileAtPosition(Position position) {
-		int x = (int) position.getX() / getTileWidth();
-		int y = (int) position.getY() / getTileHeight();
+		int x = (int) (position.getX() / getTileWidth());
+		int y = (int) (position.getY() / getTileHeight());
 		return tiles[x][y];
 	}
 	

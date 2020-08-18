@@ -10,9 +10,9 @@ import javafx.animation.Timeline;
 import javafx.util.Duration;
 
 public class ProgressiveBomb extends Bomb{
-	//private Timeline bombTimeline;
 	private int lengthOfImpact = 20;
 	private int step = 0;
+	private int wahrscheinlichkeit = 1;
 	private List<Integer> indexes = new ArrayList<>(); 
 	
 	public ProgressiveBomb(Tile tile, GameMap map) {
@@ -28,7 +28,7 @@ public class ProgressiveBomb extends Bomb{
 		}else if(timeToLive < 0){
 			explode();
 			return BombState.EXPLODING;
-		}else if (timeToLive == 0) {
+		}else if(timeToLive == 0) {
 			tile.removeBomb();
 			return BombState.EXPLODING;
 		}
@@ -38,13 +38,18 @@ public class ProgressiveBomb extends Bomb{
 	public void explode() {
 		Tile[] toDestroy = { map.getLeftNeighbor(tile, step), map.getBotNeighbor(tile, step), map.getRightNeighbor(tile, step), map.getTopNeighbor(tile, step)};
 		for(int j:indexes) {
-			if(j >= 0 && toDestroy[j] != null && toDestroy[j].getTileType().isDestructible()) {
+			if(j >= 0 && toDestroy[j] != null) {
 				Tile t = toDestroy[j];
 				for (Player player : map.getPlayersAtTile(t)) 
 					player.kill();
-				if (!t.isFree()) { 
-					t.setTileType(TileType.FREE);
+				if(t.getTileType().blocksBombPropagation())
 					indexes.set(indexes.indexOf(j), -1);
+				if(t.getTileType().isDestructible()) {
+					if((int)(Math.random() * wahrscheinlichkeit) == 0) 
+						t.setTileType(TileType.BONUS);
+					else 
+						t.setTileType(TileType.FREE);
+					
 				}
 			}else {
 				indexes.set(indexes.indexOf(j), -1);

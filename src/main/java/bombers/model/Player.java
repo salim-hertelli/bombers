@@ -7,11 +7,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import bombers.view.Tile;
 
 public class Player {
-	private static final int SPEED = 5; // numbers of pixels traveled in a single move
+	private static double SPEED = 2.5; // numbers of pixels traveled in a single move
 	private static final Dimensions dimensions = new Dimensions(25,25);
+	private final int movementCorrection = 10; //%
+
 	
 	private String username;
 	private GameMap map;
+	private Direction previousDirection;
 	private Direction direction;
 	private List<Bomb> bombs;
 	private int bombsLimit;
@@ -21,10 +24,11 @@ public class Player {
 	
 	public Player(String username, GameMap map, Position startPosition) {
 		this.direction = Direction.REST;
+		this.previousDirection = Direction.REST;
 		this.position = startPosition;
 		this.username = username;
 		this.map = map;
-		this.bombsLimit = 20;
+		this.bombsLimit = 1;
 		this.isAlive = true;
 		this.bombs = new LinkedList<>();
 	}
@@ -34,6 +38,7 @@ public class Player {
 	}
 	
 	public void setDirection(Direction direction) {
+		previousDirection = this.direction;
 		this.direction = direction;
 	}
 	
@@ -54,10 +59,12 @@ public class Player {
 		}
 		
 		// update position of the player according to the direction
-		int newX = position.getX() + direction.getX() * SPEED;
-		int newY = position.getY() + direction.getY() * SPEED;
+		adjustPosition();
+		double newX = position.getX() + direction.getX() * SPEED;
+		double newY = position.getY() + direction.getY() * SPEED;
 		Position newPosition = new Position(newX, newY);
-		if (isInScreen(newPosition) && noCollision(newPosition)) {			
+		if (isInScreen(newPosition) && noCollision(newPosition)) {
+			bonus();
 			this.position.update(newX, newY);
 		}
 		
@@ -71,6 +78,64 @@ public class Player {
 		removeBomb(toRemove);
 	}
 	
+	private void adjustPosition() {
+		if(!previousDirection.equals(direction)) {
+			Tile currentTile = map.getTileAtPosition(position);
+			Tile bRTile = map.getTileAtPosition(getLowRightCornerPosition(position));
+			if(direction.equals(Direction.RIGHT) || direction.equals(Direction.LEFT)){
+				System.out.println(currentTile.getGridPosition().getY() + " " + bRTile.getGridPosition().getY() + " " + position.getY());
+
+				if(Math.abs(bRTile.getPixelPosition().getY() - position.getY()) <= map.getTileDimensions().getHeight() / movementCorrection) {
+					System.out.print("Changed from " + position.getY());
+					this.position.update(position.getX(), bRTile.getPixelPosition().getY());
+					System.out.println(" to" + bRTile.getPixelPosition().getY());
+}
+				if(Math.abs(currentTile.getPixelPosition().getY() - position.getY()) <= map.getTileDimensions().getHeight() / movementCorrection) { 
+					System.out.print("Changed from " + position.getY());
+					this.position.update(position.getX(), currentTile.getPixelPosition().getY());
+					System.out.println( " to" + currentTile.getPixelPosition().getY());
+}
+			}else if(direction.equals(Direction.UP) || direction.equals(Direction.DOWN)) {
+				System.out.println(currentTile.getPixelPosition().getX() + " " + bRTile.getPixelPosition().getX() + " " + position.getX());
+
+				if(Math.abs(bRTile.getPixelPosition().getX() - position.getX()) <= map.getTileDimensions().getHeight() / movementCorrection) 
+					this.position.update(bRTile.getPixelPosition().getX(), position.getY());
+				if(Math.abs(currentTile.getPixelPosition().getX() - position.getX()) <= map.getTileDimensions().getHeight() / movementCorrection) 
+					this.position.update(currentTile.getPixelPosition().getX(), position.getY());
+
+			}	
+		}
+			
+	}
+	
+
+	private boolean bonus() {
+		Position topLeft = position;
+		Position lowRight = getLowRightCornerPosition(position);
+		Position topRight = new Position(lowRight.getX(), topLeft.getY());
+		Position lowLeft = new Position(topLeft.getX(), lowRight.getY());
+		boolean consumed = false;
+		
+		if (map.getTileAtPosition(topLeft).getTileType().equals(TileType.BONUS)) {
+			map.getTileAtPosition(topLeft).getBonus().consume(this, topLeft);
+			consumed = true;
+		}
+		if (map.getTileAtPosition(lowRight).getTileType().equals(TileType.BONUS)) {
+			map.getTileAtPosition(lowRight).getBonus().consume(this, lowRight);
+			consumed = true;
+		}
+		if (map.getTileAtPosition(topRight).getTileType().equals(TileType.BONUS)) {
+			map.getTileAtPosition(topRight).getBonus().consume(this, topRight);
+			consumed = true;
+		}
+		if (map.getTileAtPosition(lowLeft).getTileType().equals(TileType.BONUS)) {
+			map.getTileAtPosition(lowLeft).getBonus().consume(this, lowLeft);
+			consumed = true;
+		}
+		//For specific bonuses maybe idk
+		return consumed;
+	}
+
 	/*
 	 * returns true if the position doesn't cause a collision with a non FREE tile
 	 */
@@ -95,7 +160,6 @@ public class Player {
 		if (!map.getTileAtPosition(lowLeft).isFree()) {
 			return false;
 		}
-		
 		return true;
 	}
 	
@@ -145,6 +209,21 @@ public class Player {
 	
 	public boolean isAlive() {
 		return isAlive;
+	}
+	public int getBombsLimit() {
+		return bombsLimit;
+	}
+	
+	public double getSpeed() {
+		return SPEED;
+	}
+	
+	public void setSpeed(double speed) {
+		SPEED = speed;
+	}
+	
+	public void setBombsLimit(int bombsLimit) {
+		this.bombsLimit = bombsLimit;
 	}
 	
 	public void kill() {
