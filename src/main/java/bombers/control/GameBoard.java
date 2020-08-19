@@ -64,16 +64,24 @@ public class GameBoard {
 			public void handle(KeyEvent event) {
 				switch (event.getCode()) {
 				case UP: 
-					mainPlayer.setDirection(Direction.UP);
+					if (Direction.UP != mainPlayer.getDirection()) {
+						mainPlayer.setDirection(Direction.UP);
+					}
 					break;
 				case DOWN: 				
-					mainPlayer.setDirection(Direction.DOWN);
+					if (Direction.DOWN != mainPlayer.getDirection()) {
+						mainPlayer.setDirection(Direction.DOWN);
+					}
 					break;
 				case LEFT: 					
-					mainPlayer.setDirection(Direction.LEFT);
+					if (Direction.LEFT != mainPlayer.getDirection()) {
+						mainPlayer.setDirection(Direction.LEFT);
+					}
 					break;
 				case RIGHT: 					
-					mainPlayer.setDirection(Direction.RIGHT);
+					if (Direction.RIGHT != mainPlayer.getDirection()) {
+						mainPlayer.setDirection(Direction.RIGHT);
+					}
 					break;
 				case SPACE:
 					mainPlayer.setWantsToDrop();
@@ -84,10 +92,10 @@ public class GameBoard {
 		
 		scene.setOnKeyReleased(new EventHandler<KeyEvent> () {
 			public void handle(KeyEvent event) {
-				if (event.getCode() == KeyCode.DOWN && mainPlayer.getDirection() == Direction.DOWN ||
-						event.getCode() == KeyCode.UP && mainPlayer.getDirection() == Direction.UP ||
-						event.getCode() == KeyCode.RIGHT && mainPlayer.getDirection() == Direction.RIGHT ||
-						event.getCode() == KeyCode.LEFT && mainPlayer.getDirection() == Direction.LEFT) {
+				if (event.getCode() == KeyCode.DOWN && (mainPlayer.getDirection() == Direction.DOWN || mainPlayer.isLocked()) ||
+						event.getCode() == KeyCode.UP && (mainPlayer.getDirection() == Direction.UP || mainPlayer.isLocked()) ||
+						event.getCode() == KeyCode.RIGHT && (mainPlayer.getDirection() == Direction.RIGHT || mainPlayer.isLocked()) ||
+						event.getCode() == KeyCode.LEFT && (mainPlayer.getDirection() == Direction.LEFT || mainPlayer.isLocked())) {
 					mainPlayer.setDirection(Direction.REST);
 				}
 			}
@@ -109,7 +117,6 @@ public class GameBoard {
 			// thus the main loop does not explicitly update the bombs
 			for (Player player : players) {
 				player.move();
-				System.out.println(player.getPosition());
 			}
 			
 			// now after all the bombs got updated check which players died

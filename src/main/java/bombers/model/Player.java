@@ -9,9 +9,8 @@ import bombers.view.Tile;
 public class Player {
 	private static double SPEED = 2.5; // numbers of pixels traveled in a single move
 	private static final Dimensions dimensions = new Dimensions(25,25);
-	private final int movementCorrection = 10; //%
+	private final int movementCorrection = 55; //%
 
-	
 	private String username;
 	private GameMap map;
 	private Direction previousDirection;
@@ -21,6 +20,9 @@ public class Player {
 	private boolean isAlive;
 	private Position position;
 	private AtomicBoolean wantsToDrop = new AtomicBoolean(false);
+	private Tile lockDestination = null;
+	private Direction lockDirection = null;
+	private Direction lastDirectionRequest = null;
 	
 	public Player(String username, GameMap map, Position startPosition) {
 		this.direction = Direction.REST;
@@ -38,8 +40,11 @@ public class Player {
 	}
 	
 	public void setDirection(Direction direction) {
-		previousDirection = this.direction;
-		this.direction = direction;
+		if (direction != lockDirection) {
+			freeLock();
+			previousDirection = this.direction;
+			this.direction = direction;			
+		}
 	}
 	
 	public String getUsername() {
@@ -58,16 +63,6 @@ public class Player {
 			wantsToDrop.set(false);
 		}
 		
-		// update position of the player according to the direction
-		adjustPosition();
-		double newX = position.getX() + direction.getX() * SPEED;
-		double newY = position.getY() + direction.getY() * SPEED;
-		Position newPosition = new Position(newX, newY);
-		if (isInScreen(newPosition) && noCollision(newPosition)) {
-			bonus();
-			this.position.update(newX, newY);
-		}
-		
 		// update (and explode) bombs
 		Bomb toRemove = null;
 		for (Bomb bomb : bombs) {
@@ -76,36 +71,77 @@ public class Player {
 			};
 		}	
 		removeBomb(toRemove);
+
+		// update position of the player according to the direction
+		adjustPosition();
+		if (isLocked()) {
+			followLock();
+		}
+
+		double newX = position.getX() + direction.getX() * SPEED;
+		double newY = position.getY() + direction.getY() * SPEED;
+		Position newPosition = new Position(newX, newY);
+		if (isInScreen(newPosition) && noCollision(newPosition)) {
+			bonus();
+			this.position.update(newX, newY);
+		}
+		
+	}
+	
+	private void lockDestination(Tile destination, Direction lockDirection) {
+		lockDestination = destination;
+		this.lockDirection = lockDirection;
+	}
+	
+	private void freeLock() {
+		lockDestination = null;
+		lockDirection = null;
+	}
+	
+	public boolean isLocked() {
+		return lockDestination != null;
+	}
+	
+	private void followLock() {
+		// Bro, you know that feeling when you write code totally sure it won't work but it does? xD
+		if (direction == Direction.RIGHT || direction == Direction.LEFT) {
+			if (lockDestination.getPixelPosition().getY() > position.getY()) {
+				this.direction = Direction.DOWN;
+			} else if (lockDestination.getPixelPosition().getY() < position.getY()) {
+				this.direction = Direction.UP;
+			} else {
+				freeLock();
+			}
+		} else {
+			if (lockDestination.getPixelPosition().getX() > position.getX()) {
+				this.direction = Direction.RIGHT;
+			} else if (lockDestination.getPixelPosition().getX() < position.getX()) {
+				this.direction = Direction.LEFT;
+			} else {
+				freeLock();
+			}
+		}
 	}
 	
 	private void adjustPosition() {
-		if(!previousDirection.equals(direction)) {
-			Tile currentTile = map.getTileAtPosition(position);
-			Tile bRTile = map.getTileAtPosition(getLowRightCornerPosition(position));
-			if(direction.equals(Direction.RIGHT) || direction.equals(Direction.LEFT)){
-				System.out.println(currentTile.getGridPosition().getY() + " " + bRTile.getGridPosition().getY() + " " + position.getY());
-
-				if(Math.abs(bRTile.getPixelPosition().getY() - position.getY()) <= map.getTileDimensions().getHeight() / movementCorrection) {
-					System.out.print("Changed from " + position.getY());
-					this.position.update(position.getX(), bRTile.getPixelPosition().getY());
-					System.out.println(" to" + bRTile.getPixelPosition().getY());
-}
-				if(Math.abs(currentTile.getPixelPosition().getY() - position.getY()) <= map.getTileDimensions().getHeight() / movementCorrection) { 
-					System.out.print("Changed from " + position.getY());
-					this.position.update(position.getX(), currentTile.getPixelPosition().getY());
-					System.out.println( " to" + currentTile.getPixelPosition().getY());
-}
-			}else if(direction.equals(Direction.UP) || direction.equals(Direction.DOWN)) {
-				System.out.println(currentTile.getPixelPosition().getX() + " " + bRTile.getPixelPosition().getX() + " " + position.getX());
-
-				if(Math.abs(bRTile.getPixelPosition().getX() - position.getX()) <= map.getTileDimensions().getHeight() / movementCorrection) 
-					this.position.update(bRTile.getPixelPosition().getX(), position.getY());
-				if(Math.abs(currentTile.getPixelPosition().getX() - position.getX()) <= map.getTileDimensions().getHeight() / movementCorrection) 
-					this.position.update(currentTile.getPixelPosition().getX(), position.getY());
-
-			}	
-		}
+		// Bro, you know that feeling when you write code totally sure it won't work but it does? xD
+		if(!isLocked() && !previousDirection.equals(direction) && direction != Direction.REST) {
+			freeLock();
 			
+			Tile currentTile = map.getTileAtPosition(getCenterPosition());
+			Tile nextTile = null;
+			
+			switch(direction) {
+				case RIGHT: nextTile = map.getRightNeighbor(currentTile, 1); break;
+				case DOWN: nextTile = map.getBotNeighbor(currentTile, 1); break;
+				case LEFT: nextTile = map.getLeftNeighbor(currentTile, 1); break;
+				case UP: nextTile = map.getTopNeighbor(currentTile, 1); break;
+			}
+			
+			if (nextTile != null && nextTile.isFree()) {
+				lockDestination(nextTile, direction);
+			}
+		}
 	}
 	
 

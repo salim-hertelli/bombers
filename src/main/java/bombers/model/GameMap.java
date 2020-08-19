@@ -1,12 +1,13 @@
 package bombers.model;
 
-import java.io.IOException;
+import java.io.IOException; 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import bombers.control.GameBoard;
 import bombers.view.Tile;
@@ -25,6 +26,10 @@ public class GameMap {
 	private GameBoard gameBoard;
 	
 	public GameMap(String fileName, Dimensions dimensions, List<Player> players) {
+		this(fileName, dimensions, players, false);
+	}
+	
+	public GameMap(String fileName, Dimensions dimensions, List<Player> players, boolean ignoreMapVerification) {
 		this.dimensions = dimensions;
 		
 		List<String> lines = null;
@@ -38,6 +43,68 @@ public class GameMap {
 		xNumber = lines.get(0).length();
 		
 		generateTiles(lines);
+		if (!ignoreMapVerification && !isValid()) {
+			System.err.println("The map is invalid!");
+			System.exit(0);
+		}
+	}
+	
+	private boolean isValid() {
+		if (tiles.length < 2 || tiles[0].length < 2) {
+			return true;
+		}
+		
+		// this loop verifies that no 4 destructible Tiles are adjacent forming a bigger square
+		for (int i = 0; i < tiles.length - 1; i++) {
+			for (int j = 0; j < tiles[0].length - 1; j++) {
+				Tile upperLeft = tiles[i][j];
+				Tile upperRight = tiles[i][j+1];
+				Tile lowerLeft = tiles[i+1][j];
+				Tile lowerRight = tiles[i+1][j+1];
+				if (upperLeft.getTileType().isDestructible() 
+						&& upperRight.getTileType().isDestructible()
+						&& lowerRight.getTileType().isDestructible() 
+						&& lowerLeft.getTileType().isDestructible()) {
+					return false;
+				}
+			}
+		}
+		
+		
+		// this loops count the total number of non destructible tiles in the map
+		int totalNumber = 0;
+		for (int i = 0; i < tiles.length; i++) {
+			for (int j = 0; j < tiles[0].length; j++) {
+				TileType currentType = tiles[i][j].getTileType();
+				if (currentType.isDestructible() || currentType == TileType.FREE) {
+					totalNumber++;
+				}
+			}
+		}
+		
+		
+		// this loop count the number of the reachable tiles from (0,0)
+		Set<Tile> markedTiles = new HashSet<>();
+		List<Tile> toCheck = new LinkedList<>();
+		Tile firstTile = tiles[0][0];
+		toCheck.add(firstTile);
+		markedTiles.add(firstTile);
+		int reachableNumber = (firstTile.getTileType().isReachable())? 1 : 0;
+		while (toCheck.size() != 0) {
+			Tile currentTile = toCheck.remove(0);
+			Tile[] neighbors = {getTopNeighbor(currentTile, 1), getBotNeighbor(currentTile, 1), 
+					getRightNeighbor(currentTile, 1), getLeftNeighbor(currentTile, 1)};
+			for (Tile neighbor : neighbors) {
+				if (neighbor != null && (neighbor.getTileType().isReachable()
+						&& !markedTiles.contains(neighbor))) {
+					reachableNumber++;
+					markedTiles.add(neighbor);
+					toCheck.add(neighbor);
+				}
+			}
+		}
+		
+		return totalNumber == reachableNumber;
 	}
 	
 	public void setPlayers(List<Player> players) {
@@ -49,19 +116,18 @@ public class GameMap {
 	}
 	
 	private TileType interpretTileTypeFromChar(char c) {
-		if (c == 'W') {
-			return TileType.WALL;
-		} else if (c == 'F') {
-			return TileType.FREE;
-		} else {
-			throw new IllegalArgumentException("Character not allowed in the game map file");
+		switch(c) {		
+			case 'W': return TileType.WALL;
+			case 'F': return TileType.FREE;
+			case 'O': return TileType.OBSTACLE;
+			default: throw new IllegalArgumentException("Character not allowed in the game map file");
 		}
 	}
-	
+
 	public int getTileHeight() {
 		return dimensions.getHeight() / yNumber;
 	}
-	
+
 	public int getTileWidth() {
 		return dimensions.getWidth() / xNumber;
 	}
@@ -109,27 +175,27 @@ public class GameMap {
 		return tiles[x][y];
 	}
 	
-	public Tile getRightNeighbor(Tile tile, int n) {
-		if(tile.getGridPosition().getX() + n < tiles.length)
-			return tiles[(int) (tile.getGridPosition().getX() + n)][(int) tile.getGridPosition().getY()];
+	public Tile getRightNeighbor(Tile tile, int step) {
+		if(tile.getGridPosition().getX() + step < tiles.length)
+			return tiles[(int) (tile.getGridPosition().getX() + step)][(int) tile.getGridPosition().getY()];
 		return null;
 	}
 	
-	public Tile getTopNeighbor(Tile tile, int n) {
-		if(tile.getGridPosition().getY() - n >= 0)
-			return tiles[(int) tile.getGridPosition().getX()][(int) (tile.getGridPosition().getY() - n)];
+	public Tile getTopNeighbor(Tile tile, int step) {
+		if(tile.getGridPosition().getY() - step >= 0)
+			return tiles[(int) tile.getGridPosition().getX()][(int) (tile.getGridPosition().getY() - step)];
 		return null;
 	}
 	
-	public Tile getBotNeighbor(Tile tile, int n) {
-		if(tile.getGridPosition().getY() + n < tiles[0].length)
-			return tiles[(int) tile.getGridPosition().getX()][(int) (tile.getGridPosition().getY() + n)];
+	public Tile getBotNeighbor(Tile tile, int step) {
+		if(tile.getGridPosition().getY() + step < tiles[0].length)
+			return tiles[(int) tile.getGridPosition().getX()][(int) (tile.getGridPosition().getY() + step)];
 		return null;
 		}
 	
-	public Tile getLeftNeighbor(Tile tile, int n) {
-		if(tile.getGridPosition().getX() - n >= 0)
-			return tiles[(int) (tile.getGridPosition().getX() - n)][(int) tile.getGridPosition().getY()];
+	public Tile getLeftNeighbor(Tile tile, int step) {
+		if(tile.getGridPosition().getX() - step >= 0)
+			return tiles[(int) (tile.getGridPosition().getX() - step)][(int) tile.getGridPosition().getY()];
 		return null;
 	}
 	

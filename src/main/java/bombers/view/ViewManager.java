@@ -64,5 +64,13 @@ public class ViewManager {
 		}
 		//TODO: paints all tiles
 	}
-	// viewmanager sets the gc in the tiles
+	
+	public static void main(String[] args) {
+		for (int i = 0; i < 30; i++) {
+			for (int j = 0; j < 30; j++) {
+				System.out.print((i % 2 == 1 && j % 2 == 1)? "O" : "F");
+			}
+			System.out.println();
+		}
+	}
 }

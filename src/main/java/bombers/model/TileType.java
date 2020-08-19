@@ -18,4 +18,8 @@ public enum TileType {
 	public boolean blocksBombPropagation() {
 		return blocksBombPropagation;
 	}
+	
+	public boolean isReachable() {
+		return isDestructible || (this == FREE);
+	}
 }

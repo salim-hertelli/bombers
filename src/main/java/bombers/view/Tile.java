@@ -3,6 +3,7 @@ package bombers.view;
 import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import bombers.model.Dimensions;
@@ -18,16 +19,19 @@ public class Tile {
 	private final static String BOMB_FILE_PATH = "src/main/java/bombers/view/bomb.png";
 	private final static String FREE_TILE_FILE_PATH = "src/main/java/bombers/view/tile.png";
 	private final static String WALL_TILE_FILE_PATH = "src/main/java/bombers/view/wall.png";
+	private final static String OBSTACLE_TILE_FILE_PATH = "src/main/java/bombers/view/wall.png";
 	
 	private static Image freeImage;
 	private static Image wallImage;
 	private static Image bombImage;
-	
+	private static Image obstacleImage;
+
 	static {
 		try {
 			freeImage = new Image(new FileInputStream(FREE_TILE_FILE_PATH));
 			wallImage = new Image(new FileInputStream(WALL_TILE_FILE_PATH));
 			bombImage = new Image(new FileInputStream(BOMB_FILE_PATH));
+			obstacleImage = new Image(new FileInputStream(OBSTACLE_TILE_FILE_PATH));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -106,6 +110,8 @@ public class Tile {
 			image = wallImage;
 		} else if (tileType == TileType.FREE || tileType == TileType.BONUS) {
 			image = freeImage;
+		} else if (tileType == TileType.OBSTACLE) {
+			image = obstacleImage;
 		}
 						
 		gc.drawImage(image, pixelPosition.getX(), pixelPosition.getY());
@@ -113,4 +119,17 @@ public class Tile {
 			gc.drawImage(bombImage, pixelPosition.getX(), pixelPosition.getY());
 		}
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof Tile)) {
+			return false;
+		}
+		Tile other = (Tile) obj;
+		return gridPosition.equals(other.getGridPosition());
+	}
+	
 }
