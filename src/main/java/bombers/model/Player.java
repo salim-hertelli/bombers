@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import bombers.view.Tile;
 
 public class Player {
-	private static double SPEED = 2.5; // numbers of pixels traveled in a single move
-	private static final Dimensions dimensions = new Dimensions(25,25);
-	private final int movementCorrection = 55; //%
+	private static double SPEED = 3; // numbers of pixels traveled in a single move
+	private static final Dimensions dimensions = new Dimensions(40, 40);
+	private final double movementCorrectionRate = 30 / 100.0;
 
 	private String username;
 	private GameMap map;
@@ -22,7 +22,7 @@ public class Player {
 	private AtomicBoolean wantsToDrop = new AtomicBoolean(false);
 	private Tile lockDestination = null;
 	private Direction lockDirection = null;
-	private Direction lastDirectionRequest = null;
+	private List<Tile> allowedBombTiles;
 	
 	public Player(String username, GameMap map, Position startPosition) {
 		this.direction = Direction.REST;
@@ -33,6 +33,7 @@ public class Player {
 		this.bombsLimit = 1;
 		this.isAlive = true;
 		this.bombs = new LinkedList<>();
+		this.allowedBombTiles = new LinkedList<>();
 	}
 	
 	public Position getPosition() {
@@ -43,7 +44,21 @@ public class Player {
 		if (direction != lockDirection) {
 			freeLock();
 			previousDirection = this.direction;
-			this.direction = direction;			
+			this.direction = direction;
+			if (direction == Direction.REST) {
+				adjustPosition();
+			}
+		}
+	}
+	
+	private void adjustPosition() {
+		Position myCenter = getCenterPosition();
+		Tile tile = map.getTileAtPosition(myCenter);
+		Position tileCenter = tile.getCenterPosition();
+		
+		// In the condition we assume that tiles are all squares: height = width
+		if (Position.measureDistance(myCenter, tileCenter) < map.getTileHeight() * movementCorrectionRate) {
+			this.position.update(tile.getPixelPosition().getX(), tile.getPixelPosition().getY());
 		}
 	}
 	
@@ -54,6 +69,10 @@ public class Player {
 	// for the player to be drawn facing the right direction
 	public Direction getDirection() {
 		return direction;
+	}
+	
+	public Direction getLockDirection() {
+		return lockDirection;
 	}
 	
 	public void move() {
@@ -72,24 +91,65 @@ public class Player {
 		}	
 		removeBomb(toRemove);
 
-		// update position of the player according to the direction
-		adjustPosition();
-		if (isLocked()) {
-			followLock();
+		
+		if (!isLocked()) {
+			checkDestination();
 		}
-
+		
+		if (isLocked()) {
+			updateLock();
+		}
+		
+		// update position of the player according to the direction
+		Direction direction = this.direction;
 		double newX = position.getX() + direction.getX() * SPEED;
 		double newY = position.getY() + direction.getY() * SPEED;
 		Position newPosition = new Position(newX, newY);
-		if (isInScreen(newPosition) && noCollision(newPosition)) {
+		if (isInScreen(newPosition) && noCollision(newPosition) && (bombTolerant(newPosition))) {
 			bonus();
 			this.position.update(newX, newY);
 		}
 		
+		Tile tileToRemoveTile = null;
+		for (Tile bombedTile : allowedBombTiles) {
+			if (bombedTile != map.getTileAtPosition(getLowRightCornerPosition()) && 
+					bombedTile != map.getTileAtPosition(newPosition)) {
+				tileToRemoveTile = bombedTile;
+			};
+		}
+		if (tileToRemoveTile != null) {
+			allowedBombTiles.remove(tileToRemoveTile);
+		}
 	}
 	
-	private void lockDestination(Tile destination, Direction lockDirection) {
-		lockDestination = destination;
+	private boolean bombFree(Position position) {
+		Position lowRight = getLowRightCornerPosition(position);
+	
+		Tile lowRightTile = map.getTileAtPosition(lowRight);
+		Tile positionTile = map.getTileAtPosition(position);
+		return !(positionTile.hasBomb() || lowRightTile.hasBomb());
+	}
+	
+	private boolean bombTolerant(Position position) {
+		Position lowRight = getLowRightCornerPosition(position);
+		
+		Tile lowRightTile = map.getTileAtPosition(lowRight);
+		Tile positionTile = map.getTileAtPosition(position);
+		if (positionTile.hasBomb()) {
+			if (!allowedBombTiles.contains(positionTile)) {
+				return false;
+			}
+		}
+		if (lowRightTile.hasBomb()) {
+			if (!allowedBombTiles.contains(lowRightTile)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private void lockDestination(Tile lockDestination, Direction lockDirection) {
+		this.lockDestination = lockDestination;
 		this.lockDirection = lockDirection;
 	}
 	
@@ -102,32 +162,34 @@ public class Player {
 		return lockDestination != null;
 	}
 	
-	private void followLock() {
-		// Bro, you know that feeling when you write code totally sure it won't work but it does? xD
+	/*
+	 * this method is used when a destination is already locked
+	 * It checks whether destination is reached, if so lock is freed and direction is set back to lockDirection
+	 */
+	private void updateLock() { 
+		Direction direction = lockDirection;
 		if (direction == Direction.RIGHT || direction == Direction.LEFT) {
-			if (lockDestination.getPixelPosition().getY() > position.getY()) {
-				this.direction = Direction.DOWN;
-			} else if (lockDestination.getPixelPosition().getY() < position.getY()) {
-				this.direction = Direction.UP;
-			} else {
+			if (Math.abs(lockDestination.getPixelPosition().getY() - position.getY()) < SPEED) {
+				position.update(position.getX(), lockDestination.getPixelPosition().getY());
+				this.direction = lockDirection;
 				freeLock();
 			}
 		} else {
-			if (lockDestination.getPixelPosition().getX() > position.getX()) {
-				this.direction = Direction.RIGHT;
-			} else if (lockDestination.getPixelPosition().getX() < position.getX()) {
-				this.direction = Direction.LEFT;
-			} else {
+			if (Math.abs(lockDestination.getPixelPosition().getX() - position.getX()) < SPEED) {
+				position.update(lockDestination.getPixelPosition().getX(), position.getY());
+				this.direction = lockDirection;
 				freeLock();
 			}
 		}
 	}
 	
-	private void adjustPosition() {
-		// Bro, you know that feeling when you write code totally sure it won't work but it does? xD
-		if(!isLocked() && !previousDirection.equals(direction) && direction != Direction.REST) {
-			freeLock();
-			
+	/*
+	 * this method is used when no destination is locked
+	 * It's purpose is to look for the destination and lock it when needed
+	 */
+	private void checkDestination() {
+		Direction direction = this.direction;
+		if (!previousDirection.equals(direction) && direction != Direction.REST) {
 			Tile currentTile = map.getTileAtPosition(getCenterPosition());
 			Tile nextTile = null;
 			
@@ -139,36 +201,53 @@ public class Player {
 			}
 			
 			if (nextTile != null && nextTile.isFree()) {
+				if (direction == Direction.RIGHT || direction == Direction.LEFT) {
+					// last step of the adjustment
+					if (Math.abs(nextTile.getPixelPosition().getY() - position.getY()) < SPEED) {
+						position.update(position.getX(), nextTile.getPixelPosition().getY());
+						return;
+					}
+					
+					if (nextTile.getPixelPosition().getY() > position.getY()) {
+						this.direction = Direction.DOWN;
+					} else if (nextTile.getPixelPosition().getY() < position.getY()) {
+						this.direction = Direction.UP;
+					}
+				} else {
+					if (Math.abs(nextTile.getPixelPosition().getX() - position.getX()) < SPEED) {
+						position.update(nextTile.getPixelPosition().getX(), position.getY());
+						return;
+					}
+					
+					if (nextTile.getPixelPosition().getX() > position.getX()) {
+						this.direction = Direction.RIGHT;
+					} else if (nextTile.getPixelPosition().getX() < position.getX()) {
+						this.direction = Direction.LEFT;
+					}
+				}
+
 				lockDestination(nextTile, direction);
 			}
 		}
 	}
 	
-
+	/*
+	 * if there is a reachable bonus, the player consumes it
+	 */
 	private boolean bonus() {
 		Position topLeft = position;
 		Position lowRight = getLowRightCornerPosition(position);
-		Position topRight = new Position(lowRight.getX(), topLeft.getY());
-		Position lowLeft = new Position(topLeft.getX(), lowRight.getY());
 		boolean consumed = false;
 		
-		if (map.getTileAtPosition(topLeft).getTileType().equals(TileType.BONUS)) {
-			map.getTileAtPosition(topLeft).getBonus().consume(this, topLeft);
+		if (map.getTileAtPosition(topLeft).hasBonus()) {
+			map.getTileAtPosition(topLeft).getBonus().consume(this);
 			consumed = true;
 		}
-		if (map.getTileAtPosition(lowRight).getTileType().equals(TileType.BONUS)) {
-			map.getTileAtPosition(lowRight).getBonus().consume(this, lowRight);
+		if (map.getTileAtPosition(lowRight).hasBonus()) {
+			map.getTileAtPosition(lowRight).getBonus().consume(this);
 			consumed = true;
 		}
-		if (map.getTileAtPosition(topRight).getTileType().equals(TileType.BONUS)) {
-			map.getTileAtPosition(topRight).getBonus().consume(this, topRight);
-			consumed = true;
-		}
-		if (map.getTileAtPosition(lowLeft).getTileType().equals(TileType.BONUS)) {
-			map.getTileAtPosition(lowLeft).getBonus().consume(this, lowLeft);
-			consumed = true;
-		}
-		//For specific bonuses maybe idk
+
 		return consumed;
 	}
 
@@ -230,7 +309,8 @@ public class Player {
 			Tile dropTile = map.getTileAtPosition(getCenterPosition());
 			if (!dropTile.hasBomb()) {
 				Bomb newBomb = new ProgressiveBomb(dropTile, map);
-				addBomb(newBomb);				
+				addBomb(newBomb);
+				allowedBombTiles.add(dropTile);
 			}
 		}
 	}
@@ -263,6 +343,9 @@ public class Player {
 	}
 	
 	public void kill() {
+		for (Bomb bomb : bombs) {
+			bomb.remove();
+		}
 		isAlive = false;
 	}
 }

@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Random;
 
 import bombers.model.Dimensions;
+import bombers.model.Player;
 import bombers.model.Position;
 import bombers.model.TileType;
 import bombers.model.supplies.Bonus;
@@ -16,36 +17,40 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
 public class Tile {
-	private final static String BOMB_FILE_PATH = "src/main/java/bombers/view/bomb.png";
-	private final static String FREE_TILE_FILE_PATH = "src/main/java/bombers/view/tile.png";
+	private final static String BOMB_FILE_PATH = "src/main/java/bombers/view/bomb2.png";
+	private final static String BONUS_FILE_PATH = "src/main/java/bombers/view/bonus.png";
+	private final static String FREE_TILE_FILE_PATH = "src/main/java/bombers/view/tile2.png";
 	private final static String WALL_TILE_FILE_PATH = "src/main/java/bombers/view/wall.png";
-	private final static String OBSTACLE_TILE_FILE_PATH = "src/main/java/bombers/view/wall.png";
+	private final static String OBSTACLE_TILE_FILE_PATH = "src/main/java/bombers/view/obstacle.png";
 	
 	private static Image freeImage;
 	private static Image wallImage;
 	private static Image bombImage;
 	private static Image obstacleImage;
-
+	private static Image bonusImage;
+	
 	static {
 		try {
 			freeImage = new Image(new FileInputStream(FREE_TILE_FILE_PATH));
 			wallImage = new Image(new FileInputStream(WALL_TILE_FILE_PATH));
 			bombImage = new Image(new FileInputStream(BOMB_FILE_PATH));
+			bonusImage = new Image(new FileInputStream(BONUS_FILE_PATH));
 			obstacleImage = new Image(new FileInputStream(OBSTACLE_TILE_FILE_PATH));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private List<Class<? extends Bonus>> supplies = Arrays.asList(bombers.model.supplies.ExtraBomb.class, bombers.model.supplies.Nitro.class);
+	private List<Class<? extends Bonus>> supplies = Arrays.asList(bombers.model.supplies.ExtraBomb.class, 
+			bombers.model.supplies.Nitro.class);
 	private GraphicsContext gc;
 	private Dimensions dimensions;
 	private Position pixelPosition; // this is the usual position
 	private Position gridPosition; // this is the coordinates of this tile in the map
 	private TileType tileType;
 	private boolean hasBomb;
-	private boolean hasBonus;
 	private Bonus bonus;
+	private int probability = 1; // probability of generating a bonus after destruction
 	
 	public Tile(Position pixelposition, Position gridPosition, Dimensions dimensions, TileType tileType) {
     	this.tileType = tileType;
@@ -54,22 +59,38 @@ public class Tile {
     	this.pixelPosition = pixelposition;
 	}
 	
+	/*
+	 * use destroyTile() instead of setTileType() when destroying a tile
+	 */
 	public void setTileType(TileType tileType) {
 		this.tileType = tileType;
-		if(tileType.equals(TileType.BONUS)) {
-			hasBonus = true;
-			try {
-			    bonus = new Nitro(this);
-			    //I used this to pick a bonus randomly, but since I added an argument to the constructor it doesnt work anymore.
-			    //supplies.get(new Random().nextInt(supplies.size())).newInstance();    
-			}catch(Exception e){
-				System.err.println("Can't add bonus in " + gridPosition);
-			}
-		}	
+	}
+	
+	public boolean hasBonus() {
+		return bonus != null;
+	}
+	
+	/*
+	 * the tile is set to free and a bonus may spawn
+	 */
+	public void destroyTile() {
+		TileType oldType = tileType;
+		setTileType(TileType.FREE);
+
+		if((int)(Math.random() * probability) == 0) 
+			setBonus(new ExtraBomb(this));
+	}
+	
+	public void setBonus(Bonus bonus) {
+		this.bonus = bonus;
 	}
 	
 	public void setBomb() {
 		hasBomb = true;
+	}
+	
+	public void removeBonus() {
+		bonus = null;
 	}
 	
 	public void setGraphicsContext(GraphicsContext gc) {
@@ -78,6 +99,14 @@ public class Tile {
 	 
 	public TileType getTileType() {
 		return tileType;
+	}
+	
+	/*
+	 * returns the pixelPosition of the center of this tile
+	 */
+	public Position getCenterPosition() {
+		return new Position(pixelPosition.getX() + (dimensions.getWidth() -1) / 2,
+				pixelPosition.getY() + (dimensions.getHeight() - 1) / 2);
 	}
 	
 	public boolean hasBomb() {
@@ -93,7 +122,7 @@ public class Tile {
 	}
 	
 	public boolean isFree() {
-		return tileType == TileType.FREE || tileType == TileType.BONUS;
+		return tileType == TileType.FREE;
 	}
 	
 	public void removeBomb() {
@@ -108,7 +137,7 @@ public class Tile {
 		Image image = null;
 		if (tileType == TileType.WALL) {
 			image = wallImage;
-		} else if (tileType == TileType.FREE || tileType == TileType.BONUS) {
+		} else if (tileType == TileType.FREE) {
 			image = freeImage;
 		} else if (tileType == TileType.OBSTACLE) {
 			image = obstacleImage;
@@ -117,6 +146,9 @@ public class Tile {
 		gc.drawImage(image, pixelPosition.getX(), pixelPosition.getY());
 		if (hasBomb) {
 			gc.drawImage(bombImage, pixelPosition.getX(), pixelPosition.getY());
+		}
+		if (hasBonus()) {
+			gc.drawImage(bonusImage, pixelPosition.getX(), pixelPosition.getY());
 		}
 	}
 

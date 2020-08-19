@@ -1,8 +1,6 @@
 package bombers.model.supplies;
 
-import bombers.model.GameMap;
 import bombers.model.Player;
-import bombers.model.Position;
 import bombers.view.Tile;
 
 public class ExtraBomb extends Bonus {
@@ -11,8 +9,8 @@ public class ExtraBomb extends Bonus {
 		super(tile);
 	}
 
-	public void consume(Player player, Position position) {
-		player.setBombsLimit(player.getBombsLimit()+1);
-		remove(position);
+	public void consume(Player player) {
+		player.setBombsLimit(player.getBombsLimit() + 1);
+		tile.removeBonus();
 	}
 }

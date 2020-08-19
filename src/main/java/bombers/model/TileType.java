@@ -1,7 +1,7 @@
 package bombers.model;
 
 public enum TileType {
-	FREE(false, false), WALL(true, true), OBSTACLE(false, true), BONUS(false, false);
+	FREE(false, false), WALL(true, true), OBSTACLE(false, true);
 	
 	private boolean isDestructible;
 	private boolean blocksBombPropagation;

@@ -37,5 +37,13 @@ public class Position {
 		Position other = (Position) obj;
 		return x == other.x && y == other.y;
 	}
+	
+	/*
+	 * a and b must have either the same x or the same y value which is the case 
+	 * if we follow the rule that a player can't stand on 4 tiles at the same time
+	 */
+	public static double measureDistance(Position a, Position b) {
+		return Math.abs(a.getX() - b.getX()) + Math.abs(a.getY() - b.getY());
+	}
 }
  

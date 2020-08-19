@@ -29,5 +29,12 @@ public abstract class Bomb {
 		return tile;
 	}
 	
+	/*
+	 * this method remove the bomb even if it hasn't exploded yet
+	 */
+	public void remove() {
+		tile.removeBomb();
+	}
+	
 	abstract void explode();
 }

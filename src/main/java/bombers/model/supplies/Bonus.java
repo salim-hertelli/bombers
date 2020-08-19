@@ -1,15 +1,14 @@
 package bombers.model.supplies;
 
+import bombers.control.GameBoard; 
 import bombers.model.Player;
-import bombers.model.Position;
-import bombers.model.TileType;
 import bombers.view.Tile;
 
 public abstract class Bonus {
 	Tile tile;
-	int fps = 60;
+	int fps = GameBoard.FPS;
 	int secondsToLive = 45;
-	long ttl = fps*secondsToLive;
+	long ttl = fps * secondsToLive;
 	
 	public Bonus(Tile tile) {
 		this.tile = tile;
@@ -23,10 +22,5 @@ public abstract class Bonus {
 		return true;
 	}
 	
-	public abstract void consume(Player player, Position position);
-	
-	public void remove(Position position) {
-		tile.setTileType(TileType.FREE);
-	}
-	
+	public abstract void consume(Player player);
 }

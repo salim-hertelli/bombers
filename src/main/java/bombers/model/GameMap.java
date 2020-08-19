@@ -18,6 +18,7 @@ import bombers.view.Tile;
  * accessible via getters and setters
  */
 public class GameMap {
+	private final Dimensions teilDimensions = new Dimensions(40,40);
 	private Tile[][] tiles;
 	private Dimensions dimensions; // dimensions of the map
 	private int xNumber; // number of tiles in a line
@@ -25,13 +26,11 @@ public class GameMap {
 	private List<Player> players;
 	private GameBoard gameBoard;
 	
-	public GameMap(String fileName, Dimensions dimensions, List<Player> players) {
-		this(fileName, dimensions, players, false);
+	public GameMap(String fileName, List<Player> players) {
+		this(fileName, players, false);
 	}
 	
-	public GameMap(String fileName, Dimensions dimensions, List<Player> players, boolean ignoreMapVerification) {
-		this.dimensions = dimensions;
-		
+	public GameMap(String fileName, List<Player> players, boolean ignoreMapVerification) {
 		List<String> lines = null;
 		try {
 			lines = Files.readAllLines(Paths.get(fileName));
@@ -42,6 +41,8 @@ public class GameMap {
 		yNumber = lines.size();
 		xNumber = lines.get(0).length();
 		
+		this.dimensions = new Dimensions(xNumber * getTileWidth(), yNumber * getTileHeight());
+
 		generateTiles(lines);
 		if (!ignoreMapVerification && !isValid()) {
 			System.err.println("The map is invalid!");
@@ -57,14 +58,14 @@ public class GameMap {
 		// this loop verifies that no 4 destructible Tiles are adjacent forming a bigger square
 		for (int i = 0; i < tiles.length - 1; i++) {
 			for (int j = 0; j < tiles[0].length - 1; j++) {
-				Tile upperLeft = tiles[i][j];
-				Tile upperRight = tiles[i][j+1];
-				Tile lowerLeft = tiles[i+1][j];
-				Tile lowerRight = tiles[i+1][j+1];
-				if (upperLeft.getTileType().isDestructible() 
-						&& upperRight.getTileType().isDestructible()
-						&& lowerRight.getTileType().isDestructible() 
-						&& lowerLeft.getTileType().isDestructible()) {
+				TileType upperLeft = tiles[i][j].getTileType();
+				TileType upperRight = tiles[i][j+1].getTileType();
+				TileType lowerLeft = tiles[i+1][j].getTileType();
+				TileType lowerRight = tiles[i+1][j+1].getTileType();
+				if ((upperLeft.isDestructible() || upperLeft == TileType.FREE)
+						&& (upperRight.isDestructible() || upperRight == TileType.FREE)
+						&& (lowerRight.isDestructible() || lowerRight == TileType.FREE)
+						&& (lowerLeft.isDestructible() || lowerLeft == TileType.FREE)) {
 					return false;
 				}
 			}
@@ -125,11 +126,11 @@ public class GameMap {
 	}
 
 	public int getTileHeight() {
-		return dimensions.getHeight() / yNumber;
+		return teilDimensions.getHeight();
 	}
 
 	public int getTileWidth() {
-		return dimensions.getWidth() / xNumber;
+		return teilDimensions.getWidth();
 	}
 	
 	public Dimensions getTileDimensions() {
@@ -227,13 +228,5 @@ public class GameMap {
 	
 	public void setGameBoard(GameBoard gB) {
 		gameBoard = gB;
-	}
-	
-	public void addBombToExplode(ProgressiveBomb pb) {
-		gameBoard.addBombToExplode(pb);
-	}
-	
-	public void removeBombToExplode(ProgressiveBomb pb) {
-		gameBoard.explosionTerminated(pb);
 	}
 }
