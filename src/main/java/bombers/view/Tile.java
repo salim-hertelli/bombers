@@ -20,6 +20,7 @@ import javafx.scene.image.Image;
 public class Tile {
 	private final static String BOMB_FILE_PATH = "src/main/java/bombers/view/bomb2.png";
 	private final static String BONUS_FILE_PATH = "src/main/java/bombers/view/bonus.png";
+	private final static String EXPLOSION_FILE_PATH = "src/main/java/bombers/view/exp"; //Add #.png
 	private final static String FREE_TILE_FILE_PATH = "src/main/java/bombers/view/tile2.png";
 	private final static String WALL_TILE_FILE_PATH = "src/main/java/bombers/view/wall.png";
 	private final static String OBSTACLE_TILE_FILE_PATH = "src/main/java/bombers/view/obstacle.png";
@@ -29,6 +30,7 @@ public class Tile {
 	private static Image bombImage;
 	private static Image obstacleImage;
 	private static Image bonusImage;
+	private static Image[] explosionImage = new Image[9];
 	
 	static {
 		try {
@@ -37,6 +39,9 @@ public class Tile {
 			bombImage = new Image(new FileInputStream(BOMB_FILE_PATH));
 			bonusImage = new Image(new FileInputStream(BONUS_FILE_PATH));
 			obstacleImage = new Image(new FileInputStream(OBSTACLE_TILE_FILE_PATH));
+			for(int i=1; i < 10; i++) {
+				explosionImage[i-1] = new Image(new FileInputStream(EXPLOSION_FILE_PATH + i + ".png")); 
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -54,6 +59,7 @@ public class Tile {
 	private Bonus bonus;
 	private int probability = 1; // probability of generating a bonus after destruction
 	private boolean isExploding;
+	private int explosionPhase = 0;
 	
 	public Tile(Position pixelposition, Position gridPosition, Dimensions dimensions, TileType tileType) {
     	this.tileType = tileType;
@@ -160,8 +166,11 @@ public class Tile {
 			if(!isExploding)
 				image = freeImage;
 			else {
-				image = obstacleImage; //TOCHANGE explosion
-				setExploding(false);
+				image = explosionImage[explosionPhase++];
+				if(explosionPhase == 9) {
+					setExploding(false);
+					explosionPhase = 0;
+				}
 			}
 		} else if (tileType == TileType.OBSTACLE) {
 			image = obstacleImage;
