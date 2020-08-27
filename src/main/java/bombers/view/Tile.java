@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import bombers.model.Bomb;
 import bombers.model.Dimensions;
 import bombers.model.Player;
 import bombers.model.Position;
@@ -49,14 +50,18 @@ public class Tile {
 	private Position gridPosition; // this is the coordinates of this tile in the map
 	private TileType tileType;
 	private boolean hasBomb;
+	private Bomb bomb;
 	private Bonus bonus;
 	private int probability = 1; // probability of generating a bonus after destruction
+	private boolean isExploding;
 	
 	public Tile(Position pixelposition, Position gridPosition, Dimensions dimensions, TileType tileType) {
     	this.tileType = tileType;
     	this.dimensions = dimensions;
     	this.gridPosition = gridPosition;
     	this.pixelPosition = pixelposition;
+    	this.bomb = null;
+    	this.isExploding = false;
 	}
 	
 	/*
@@ -76,7 +81,6 @@ public class Tile {
 	public void destroyTile() {
 		TileType oldType = tileType;
 		setTileType(TileType.FREE);
-
 		if((int)(Math.random() * probability) == 0) 
 			setBonus(new ExtraBomb(this));
 	}
@@ -85,12 +89,18 @@ public class Tile {
 		this.bonus = bonus;
 	}
 	
-	public void setBomb() {
+	
+	public void setBomb(Bomb bomb) {
+		this.bomb = bomb;
 		hasBomb = true;
 	}
 	
+	public Bomb getBomb() {
+		return bomb;
+	}
+	
 	public void removeBonus() {
-		bonus = null;
+		this.bonus = null;
 	}
 	
 	public void setGraphicsContext(GraphicsContext gc) {
@@ -126,7 +136,16 @@ public class Tile {
 	}
 	
 	public void removeBomb() {
-		hasBomb = false;
+		this.bomb = null;
+	}
+	
+	//If a second bomb explodes the tile where there's an exploding bomb, the first bomb shouldn't explode a second time.
+	public void initiateExplosion() {
+		this.hasBomb = false;
+	}
+	
+	public void setExploding(boolean exploding) {
+		this.isExploding = exploding;
 	}
 	
 	public Bonus getBonus() {
@@ -138,7 +157,12 @@ public class Tile {
 		if (tileType == TileType.WALL) {
 			image = wallImage;
 		} else if (tileType == TileType.FREE) {
-			image = freeImage;
+			if(!isExploding)
+				image = freeImage;
+			else {
+				image = obstacleImage; //TOCHANGE explosion
+				setExploding(false);
+			}
 		} else if (tileType == TileType.OBSTACLE) {
 			image = obstacleImage;
 		}

@@ -10,7 +10,7 @@ public abstract class Bomb {
 	public Bomb(Tile tile, GameMap map) {
 		this.tile = tile;
 		this.map = map;
-		tile.setBomb();
+		tile.setBomb(this);
 	}
 	
 	/*
@@ -34,6 +34,10 @@ public abstract class Bomb {
 	 */
 	public void remove() {
 		tile.removeBomb();
+	}
+	
+	public void setTTL(int ttl) {
+		this.timeToLive = ttl;
 	}
 	
 	abstract void explode();
