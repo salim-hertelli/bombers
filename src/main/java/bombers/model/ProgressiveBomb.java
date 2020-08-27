@@ -21,11 +21,11 @@ public class ProgressiveBomb extends Bomb{
 	
 	@Override
 	public BombState countDown() {
-		if (timeToLive-- == -lengthOfImpact){
+		if (step == lengthOfImpact){
 			explode();
 			tile.removeBomb();
 			return BombState.EXPLODED;
-		} else if(timeToLive < 0){
+		} else if(--timeToLive < 0){
 			explode();
 			return BombState.EXPLODING;
 		} else if(timeToLive == 0) {
@@ -89,7 +89,6 @@ public class ProgressiveBomb extends Bomb{
 		}		
 		bomb.setTTL(1);
 		bomb.setStep(1);
-		bomb.countDown();
 	}
 	
 	public void setIndexes(int index, int value) {
