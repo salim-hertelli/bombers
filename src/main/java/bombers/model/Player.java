@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import bombers.view.Tile;
 
 public class Player {
-	private static double SPEED = 3; // numbers of pixels traveled in a single move
+	private static double SPEED = 2.5; // numbers of pixels traveled in a single move
 	private static final Dimensions dimensions = new Dimensions(40, 40);
 	private final double movementCorrectionRate = 30 / 100.0;
 
@@ -23,6 +23,9 @@ public class Player {
 	private Tile lockDestination = null;
 	private Direction lockDirection = null;
 	private List<Tile> allowedBombTiles;
+	private boolean hasJump;
+	private Position blockJump;
+	private Direction expectedDirection = null;
 	
 	public Player(String username, GameMap map, Position startPosition) {
 		this.direction = Direction.REST;
@@ -34,6 +37,8 @@ public class Player {
 		this.isAlive = true;
 		this.bombs = new LinkedList<>();
 		this.allowedBombTiles = new LinkedList<>();
+		this.hasJump = false;
+		this.blockJump = null;
 	}
 	
 	public Position getPosition() {
@@ -44,7 +49,8 @@ public class Player {
 		if (direction != lockDirection) {
 			freeLock();
 			previousDirection = this.direction;
-			this.direction = direction;
+			if(blockJump == null)
+				this.direction = direction;
 			if (direction == Direction.REST) {
 				adjustPosition();
 			}
@@ -92,7 +98,7 @@ public class Player {
 		removeBomb(toRemove);
 
 		
-		if (!isLocked()) {
+		if (blockJump == null && !isLocked()) {
 			checkDestination();
 		}
 		
@@ -105,11 +111,16 @@ public class Player {
 		double newX = position.getX() + direction.getX() * SPEED;
 		double newY = position.getY() + direction.getY() * SPEED;
 		Position newPosition = new Position(newX, newY);
-		if (isInScreen(newPosition) && noCollision(newPosition) && (bombTolerant(newPosition))) {
+		if (isInScreen(newPosition) && noCollision(newPosition) && bombTolerant(newPosition)) {
 			bonus();
 			this.position.update(newX, newY);
+			if(blockJump != null) {
+				blockJump = null;
+				this.setDirection(Direction.REST);
+			}	
+		}else if(blockJump != null || (hasJump() && nextTileAvailable(this.getPosition()))) {
+			this.position.update(newX, newY);
 		}
-		
 		Tile tileToRemoveTile = null;
 		for (Tile bombedTile : allowedBombTiles) {
 			if (bombedTile != map.getTileAtPosition(getLowRightCornerPosition()) && 
@@ -120,6 +131,29 @@ public class Player {
 		if (tileToRemoveTile != null) {
 			allowedBombTiles.remove(tileToRemoveTile);
 		}
+	}
+
+	private boolean nextTileAvailable(Position position) {
+		Position nextPosition = null;
+		switch (direction) {
+		case UP:
+			nextPosition = new Position(position.getX(), position.getY() - 2*map.getTileHeight());
+			break;
+		case DOWN:
+			nextPosition = new Position(position.getX(), position.getY() + 2*map.getTileHeight());
+			break;
+		case RIGHT:
+			nextPosition = new Position(position.getX() + 2*map.getTileWidth(), position.getY());
+			break;
+		case LEFT:
+			nextPosition = new Position(position.getX() - 2*map.getTileWidth(), position.getY());
+			break;
+		}
+		if(isInScreen(nextPosition) && noCollision(nextPosition) && bombTolerant(nextPosition)) {
+			blockJump = nextPosition;
+			return true;
+		}
+		return false;
 	}
 	
 	private boolean bombFree(Position position) {
@@ -342,10 +376,21 @@ public class Player {
 		this.bombsLimit = bombsLimit;
 	}
 	
+	public boolean hasJump() {
+		return hasJump;
+	}
+	
+	public void setJump(boolean jump) {
+		hasJump = jump;
+	}
+	
 	public void kill() {
 		for (Bomb bomb : bombs) {
 			bomb.remove();
 		}
-		isAlive = false;
+		if(hasJump())
+			setJump(false);
+		else
+			isAlive = false;
 	}
 }

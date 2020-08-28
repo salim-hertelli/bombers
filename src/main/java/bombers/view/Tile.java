@@ -13,13 +13,15 @@ import bombers.model.Position;
 import bombers.model.TileType;
 import bombers.model.supplies.Bonus;
 import bombers.model.supplies.ExtraBomb;
+import bombers.model.supplies.Jumper;
 import bombers.model.supplies.Nitro;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
 public class Tile {
 	private final static String BOMB_FILE_PATH = "src/main/java/bombers/view/bomb2.png";
-	private final static String BONUS_FILE_PATH = "src/main/java/bombers/view/bonus.png";
+	private final static String EXTRA_BOMB_FILE_PATH = "src/main/java/bombers/view/bonus.png";
+	private final static String JUMPER_FILE_PATH = "src/main/java/bombers/view/spring.png";
 	private final static String EXPLOSION_FILE_PATH = "src/main/java/bombers/view/exp"; //Add #.png
 	private final static String FREE_TILE_FILE_PATH = "src/main/java/bombers/view/tile2.png";
 	private final static String WALL_TILE_FILE_PATH = "src/main/java/bombers/view/wall.png";
@@ -29,7 +31,8 @@ public class Tile {
 	private static Image wallImage;
 	private static Image bombImage;
 	private static Image obstacleImage;
-	private static Image bonusImage;
+	private static Image extraBombImage;
+	private static Image jumperImage;
 	private static Image[] explosionImage = new Image[9];
 	
 	static {
@@ -37,7 +40,8 @@ public class Tile {
 			freeImage = new Image(new FileInputStream(FREE_TILE_FILE_PATH));
 			wallImage = new Image(new FileInputStream(WALL_TILE_FILE_PATH));
 			bombImage = new Image(new FileInputStream(BOMB_FILE_PATH));
-			bonusImage = new Image(new FileInputStream(BONUS_FILE_PATH));
+			extraBombImage = new Image(new FileInputStream(EXTRA_BOMB_FILE_PATH));
+			jumperImage = new Image(new FileInputStream(JUMPER_FILE_PATH));
 			obstacleImage = new Image(new FileInputStream(OBSTACLE_TILE_FILE_PATH));
 			for(int i=1; i < 10; i++) {
 				explosionImage[i-1] = new Image(new FileInputStream(EXPLOSION_FILE_PATH + i + ".png")); 
@@ -88,7 +92,7 @@ public class Tile {
 		TileType oldType = tileType;
 		setTileType(TileType.FREE);
 		if((int)(Math.random() * probability) == 0) 
-			setBonus(new ExtraBomb(this));
+			setBonus(bombers.model.supplies.Bonus.generateBonus(this));
 	}
 	
 	public void setBonus(Bonus bonus) {
@@ -181,7 +185,11 @@ public class Tile {
 			gc.drawImage(bombImage, pixelPosition.getX(), pixelPosition.getY());
 		}
 		if (hasBonus()) {
-			gc.drawImage(bonusImage, pixelPosition.getX(), pixelPosition.getY());
+			if(getBonus() instanceof ExtraBomb)
+				gc.drawImage(extraBombImage, pixelPosition.getX(), pixelPosition.getY());
+			else if(getBonus() instanceof Jumper)
+				gc.drawImage(jumperImage, pixelPosition.getX() + 6.5, pixelPosition.getY());
+			getBonus().countDown();
 		}
 	}
 

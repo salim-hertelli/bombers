@@ -10,7 +10,6 @@ import bombers.view.Tile;
 public class ProgressiveBomb extends Bomb{
 	private int lengthOfImpact = 3;
 	private int step = 0;
-	private int wahrscheinlichkeit = 1;
 	private List<Integer> indexes = new ArrayList<>(); 
 	
 	public ProgressiveBomb(Tile tile, GameMap map) {
