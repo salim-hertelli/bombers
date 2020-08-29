@@ -8,12 +8,13 @@ import bombers.model.supplies.ExtraBomb;
 import bombers.view.Tile;
 
 public class ProgressiveBomb extends Bomb{
-	private int lengthOfImpact = 1;
+	private int lengthOfImpact;
 	private int step = 0;
 	private List<Integer> indexes = new ArrayList<>(); 
 	
-	public ProgressiveBomb(Tile tile, GameMap map) {
+	public ProgressiveBomb(Tile tile, GameMap map, int lenghtOfImpact) {
 		super(tile, map);
+		this.lengthOfImpact = lenghtOfImpact;
 		for (int i=0; i < 4;)
 	        indexes.add(i++);
 	}

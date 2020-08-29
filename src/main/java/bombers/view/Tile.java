@@ -8,12 +8,14 @@ import java.util.Random;
 
 import bombers.model.Bomb;
 import bombers.model.Dimensions;
+import bombers.model.GameMap;
 import bombers.model.Player;
 import bombers.model.Position;
 import bombers.model.TileType;
 import bombers.model.supplies.Bonus;
 import bombers.model.supplies.ExtraBomb;
 import bombers.model.supplies.Jumper;
+import bombers.model.supplies.LongerBomb;
 import bombers.model.supplies.Nitro;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -64,8 +66,11 @@ public class Tile {
 	private int probability = 1; // probability of generating a bonus after destruction
 	private boolean isExploding;
 	private int explosionPhase = 0;
+	private GameMap map;
 	
-	public Tile(Position pixelposition, Position gridPosition, Dimensions dimensions, TileType tileType) {
+	public Tile(Position pixelposition, Position gridPosition, Dimensions dimensions, 
+			TileType tileType, GameMap map) {
+		this.map = map;
     	this.tileType = tileType;
     	this.dimensions = dimensions;
     	this.gridPosition = gridPosition;
@@ -103,6 +108,9 @@ public class Tile {
 	public void setBomb(Bomb bomb) {
 		this.bomb = bomb;
 		hasBomb = true;
+		map.getPlayersAtTile(this).forEach((player) -> {
+			player.addAllowedBombedTile(this);
+		});
 	}
 	
 	public Bomb getBomb() {
@@ -187,7 +195,7 @@ public class Tile {
 		if (hasBonus()) {
 			if(getBonus() instanceof ExtraBomb)
 				gc.drawImage(extraBombImage, pixelPosition.getX(), pixelPosition.getY());
-			else if(getBonus() instanceof Jumper)
+			else if (getBonus() instanceof LongerBomb)
 				gc.drawImage(jumperImage, pixelPosition.getX() + 6.5, pixelPosition.getY());
 			getBonus().countDown();
 		}

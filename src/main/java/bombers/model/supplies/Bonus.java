@@ -22,7 +22,7 @@ public abstract class Bonus {
 		case 0:
 			return new ExtraBomb(tile);
 		case 1:
-			return new Jumper(tile);
+			return new LongerBomb(tile);
 		}
 		return null;
 	}

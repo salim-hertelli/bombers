@@ -32,9 +32,10 @@ public class Player {
 	private List<Tile> allowedBombTiles;
 	private boolean hasJump;
 	private Position blockJump;
-	private Direction expectedDirection = null;
+	private int bombLengthOfImpact;
 	
 	public Player(String username, GameMap map, Position startPosition) {
+		this.bombLengthOfImpact = 1;
 		this.direction = Direction.REST;
 		this.previousDirection = Direction.REST;
 		this.position = startPosition;
@@ -46,6 +47,13 @@ public class Player {
 		this.allowedBombTiles = new LinkedList<>();
 		this.hasJump = false;
 		this.blockJump = null;
+	}
+	
+	/*
+	 * increments the length of impact of the bombs by 1
+	 */
+	public void incrementLengthOfImpact() {
+		bombLengthOfImpact++;
 	}
 	
 	public Position getPosition() {
@@ -131,7 +139,7 @@ public class Player {
 		Tile tileToRemoveTile = null;
 		for (Tile bombedTile : allowedBombTiles) {
 			if (bombedTile != map.getTileAtPosition(getLowRightCornerPosition()) && 
-					bombedTile != map.getTileAtPosition(newPosition)) {
+					bombedTile != map.getTileAtPosition(getPosition())) {
 				tileToRemoveTile = bombedTile;
 			};
 		}
@@ -344,12 +352,18 @@ public class Player {
 	public void setWantsToDrop() {
 		wantsToDrop.set(true);
 	}
+
+	public void addAllowedBombedTile(Tile tile) {
+		if (!allowedBombTiles.contains(tile)) {
+			allowedBombTiles.add(tile);
+		}
+	}
 	
 	private void dropBomb() {
 		if (bombs.size() < bombsLimit) {
 			Tile dropTile = map.getTileAtPosition(getCenterPosition());
 			if (!dropTile.hasBomb()) {
-				Bomb newBomb = new ProgressiveBomb(dropTile, map);
+				Bomb newBomb = new ProgressiveBomb(dropTile, map, bombLengthOfImpact);
 				addBomb(newBomb);
 				allowedBombTiles.add(dropTile);
 			}

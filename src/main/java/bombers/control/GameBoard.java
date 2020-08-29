@@ -49,13 +49,15 @@ public class GameBoard {
 		
 		players = new LinkedList<>();
 		mainPlayer = new Player("grnvs", map, new Position(0, 0));
+		Player secondPlayer = new Player("second", map, new Position(120, 0));
 		players.add(mainPlayer);
+		players.add(secondPlayer);
 		map.setPlayers(players);
 		
 		viewManager = new ViewManager(map, players);
 		Scene scene = viewManager.getScene();
 
-		setMainPlayerHandler(scene);
+		setPlayersHandler(mainPlayer, secondPlayer, scene);
 		
         primaryStage.setTitle("Bombers");
         primaryStage.setScene(scene);
@@ -69,40 +71,64 @@ public class GameBoard {
 		return map;
 	}
 	
-	private void setMainPlayerHandler(Scene scene) {
+	private void setPlayersHandler(Player mainPlayer, Player secondPlayer, Scene scene) {
 		scene.setOnKeyPressed(new EventHandler<KeyEvent> () {
 			
 			public void handle(KeyEvent event) {
 				switch (event.getCode()) {
-				case UP: 
-					if (Direction.UP != mainPlayer.getDirection()) {
-						mainPlayer.setDirection(Direction.UP);
-					}
-					break;
-				case DOWN: 				
-					if (Direction.DOWN != mainPlayer.getDirection()) {
-						mainPlayer.setDirection(Direction.DOWN);
-					}
-					break;
-				case LEFT: 					
-					if (Direction.LEFT != mainPlayer.getDirection()) {
-						mainPlayer.setDirection(Direction.LEFT);
-					}
-					break;
-				case RIGHT: 					
-					if (Direction.RIGHT != mainPlayer.getDirection()) {
-						mainPlayer.setDirection(Direction.RIGHT);
-					}
-					break;
-				case SPACE:
-					mainPlayer.setWantsToDrop();
-					break;
+					case UP: 
+						if (Direction.UP != mainPlayer.getDirection()) {
+							mainPlayer.setDirection(Direction.UP);
+						}
+						break;
+					case DOWN: 				
+						if (Direction.DOWN != mainPlayer.getDirection()) {
+							mainPlayer.setDirection(Direction.DOWN);
+						}
+						break;
+					case LEFT: 					
+						if (Direction.LEFT != mainPlayer.getDirection()) {
+							mainPlayer.setDirection(Direction.LEFT);
+						}
+						break;
+					case RIGHT: 					
+						if (Direction.RIGHT != mainPlayer.getDirection()) {
+							mainPlayer.setDirection(Direction.RIGHT);
+						}
+						break;
+					case SPACE:
+						mainPlayer.setWantsToDrop();
+						break;
+					case Z: 
+						if (Direction.UP != secondPlayer.getDirection()) {
+							secondPlayer.setDirection(Direction.UP);
+						}
+						break;
+					case S: 				
+						if (Direction.DOWN != secondPlayer.getDirection()) {
+							secondPlayer.setDirection(Direction.DOWN);
+						}
+						break;
+					case Q: 					
+						if (Direction.LEFT != secondPlayer.getDirection()) {
+							secondPlayer.setDirection(Direction.LEFT);
+						}
+						break;
+					case D: 					
+						if (Direction.RIGHT != secondPlayer.getDirection()) {
+							secondPlayer.setDirection(Direction.RIGHT);
+						}
+						break;
+					case P:
+						secondPlayer.setWantsToDrop();
+						break;
 				}
 			}
         });
 		
 		scene.setOnKeyReleased(new EventHandler<KeyEvent> () {
 			public void handle(KeyEvent event) {
+				System.out.println(event.getCode());
 				boolean playerLocked = mainPlayer.isLocked();
 				Direction direction = (playerLocked) ? mainPlayer.getLockDirection() : mainPlayer.getDirection();
 				if (event.getCode() == KeyCode.DOWN && direction == Direction.DOWN ||
@@ -110,6 +136,16 @@ public class GameBoard {
 						event.getCode() == KeyCode.RIGHT && direction == Direction.RIGHT ||
 						event.getCode() == KeyCode.LEFT && direction == Direction.LEFT) {
 					mainPlayer.setDirection(Direction.REST);
+				}
+				
+				boolean secondPlayerLocked = secondPlayer.isLocked();
+				Direction secondDirection = (secondPlayerLocked) ? 
+						secondPlayer.getLockDirection() : secondPlayer.getDirection();
+				if (event.getCode() == KeyCode.S && secondDirection == Direction.DOWN ||
+						event.getCode() == KeyCode.Z && secondDirection == Direction.UP ||
+						event.getCode() == KeyCode.D && secondDirection == Direction.RIGHT ||
+						event.getCode() == KeyCode.Q && secondDirection == Direction.LEFT) {
+					secondPlayer.setDirection(Direction.REST);
 				}
 			}
         });
@@ -121,11 +157,11 @@ public class GameBoard {
 			boolean allDead = true;
 			// each player updates his bombs during his move
 			// thus the main loop does not explicitly update the bombs
-			mainPlayer.move();
 			//We should get the position from other players irgendwie
 			
 			// now after all the bombs got updated check which players died
 			for(Player player : players) {
+				player.move();
 				if (!player.isAlive()) 
 					players.remove(player);
 				else

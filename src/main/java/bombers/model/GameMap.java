@@ -159,7 +159,8 @@ public class GameMap {
 			for (int i = 0; i < xNumber; i++) {
 				Position tilePosition = new Position(i * getTileWidth(), j * getTileHeight());
 				TileType tileType = interpretTileTypeFromChar(currentLine.charAt(i));
-				Tile newTile = new Tile(tilePosition, new Position(i,j), getTileDimensions(), tileType);
+				Tile newTile = new Tile(tilePosition, new Position(i,j), getTileDimensions()
+						, tileType, this);
 				tiles[i][j] = newTile;
 			}
 		}
