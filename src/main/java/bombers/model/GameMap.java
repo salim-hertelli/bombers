@@ -38,9 +38,9 @@ public class GameMap {
 			e.printStackTrace();
 		}
 
-		yNumber = lines.size();
+		yNumber = lines.size()-1;
 		xNumber = lines.get(0).length();
-		
+		System.out.println(xNumber +" "+ yNumber);
 		this.dimensions = new Dimensions(xNumber * getTileWidth(), yNumber * getTileHeight());
 
 		generateTiles(lines);

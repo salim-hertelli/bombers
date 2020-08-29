@@ -16,10 +16,15 @@ import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -27,7 +32,10 @@ public class GameBoard {
 	private final String mapFilePath = "src/main/java/bombers/control/map.txt";
 	public final static int FPS = 60;
 	
+	private Stage primaryStage;
 	private Dimensions dimensions;
+	private Button replay;
+	private Button quit;
 	List<Player> players;
 	Player mainPlayer;
 	ViewManager viewManager;
@@ -37,6 +45,7 @@ public class GameBoard {
 	public GameBoard(Stage primaryStage) {
 		GameMap map = setupGameMap();
 		this.dimensions = map.getDimensions();
+		this.primaryStage = primaryStage;
 		
 		players = new LinkedList<>();
 		mainPlayer = new Player("grnvs", map, new Position(0, 0));
@@ -109,22 +118,69 @@ public class GameBoard {
 	private void mainLoop() {
 		// TODO make the fps change dynamically with a topFPSLimit being the constant "MainloopIteration"ps used by the server
 		Timeline timeline = new Timeline(new KeyFrame(Duration.millis(1000 / FPS), e-> {
+			boolean allDead = true;
 			// each player updates his bombs during his move
 			// thus the main loop does not explicitly update the bombs
-			for (Player player : players) {
-				player.move();
-			}
+			mainPlayer.move();
+			//We should get the position from other players irgendwie
 			
 			// now after all the bombs got updated check which players died
-			for (Player player : players) {
-				if (!player.isAlive()) {
+			for(Player player : players) {
+				if (!player.isAlive()) 
 					players.remove(player);
-				}
+				else
+					allDead = false;
 			}
-			
+			if(allDead) {
+				gameOver();
+				mainPlayer.getAnimation().stop();
+			}
 			viewManager.repaintAll();
 		}));
+		mainPlayer.setAnimation(timeline);
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
+	}
+	
+	private void gameOver() {
+		replay = new Button();
+	    replay.setText("Replay");
+	    EventHandler<ActionEvent> replayEvent = new EventHandler<ActionEvent>() { 
+            public void handle(ActionEvent e) { 
+            	new GameBoard(primaryStage);
+            	((Stage)replay.getScene().getWindow()).close();
+            } 
+        };
+	    replay.setOnAction(replayEvent);
+	    
+	    quit = new Button();
+	    quit.setText("Quit");
+
+	    EventHandler<ActionEvent> quitEvent = new EventHandler<ActionEvent>() { 
+            public void handle(ActionEvent e) { 
+            	((Stage)quit.getScene().getWindow()).close();
+            	primaryStage.close();
+            } 
+        };
+	    quit.setOnAction(quitEvent);
+	    
+        FlowPane secondaryLayout = new FlowPane();
+        secondaryLayout.getChildren().addAll(replay, quit);
+        
+        Scene secondScene = new Scene(secondaryLayout, 230, 100);
+
+        // New window (Stage)
+        Stage newWindow = new Stage();
+        newWindow.setTitle("Game over");
+        newWindow.setScene(secondScene);
+
+        newWindow.initModality(Modality.WINDOW_MODAL);
+
+        newWindow.initOwner(primaryStage);
+
+        newWindow.setX(primaryStage.getX() + primaryStage.getWidth()/2 - secondScene.getWidth()/2);
+        newWindow.setY(primaryStage.getY() + primaryStage.getHeight()/2 - secondScene.getHeight()/2);
+
+        newWindow.show();
 	}
 }

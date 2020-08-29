@@ -5,12 +5,19 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import bombers.view.Tile;
+import javafx.animation.Timeline;
+import javafx.scene.Scene;
+import javafx.scene.layout.StackPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 public class Player {
 	private static double SPEED = 2.5; // numbers of pixels traveled in a single move
 	private static final Dimensions dimensions = new Dimensions(40, 40);
 	private final double movementCorrectionRate = 30 / 100.0;
-
+	private Timeline animation;
+	
 	private String username;
 	private GameMap map;
 	private Direction previousDirection;
@@ -384,6 +391,14 @@ public class Player {
 		hasJump = jump;
 	}
 	
+	public Timeline getAnimation() {
+		return animation;
+	}
+	
+	public void setAnimation(Timeline animation) {
+		this.animation = animation;
+	}
+	
 	public void kill() {
 		for (Bomb bomb : bombs) {
 			bomb.remove();
@@ -393,4 +408,6 @@ public class Player {
 		else
 			isAlive = false;
 	}
+	
+	
 }
