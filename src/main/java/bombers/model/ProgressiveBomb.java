@@ -8,7 +8,7 @@ import bombers.model.supplies.ExtraBomb;
 import bombers.view.Tile;
 
 public class ProgressiveBomb extends Bomb{
-	private int lengthOfImpact = 3;
+	private int lengthOfImpact = 1;
 	private int step = 0;
 	private List<Integer> indexes = new ArrayList<>(); 
 	
@@ -73,7 +73,6 @@ public class ProgressiveBomb extends Bomb{
 			indexes.set(3, -1);
 		}
 		bomb.setTTL(1);
-		bomb.setStep(1);
 	}
 	
 	public void sameLine(Tile tile) {
@@ -87,7 +86,6 @@ public class ProgressiveBomb extends Bomb{
 			indexes.set(0, -1);
 		}		
 		bomb.setTTL(1);
-		bomb.setStep(1);
 	}
 	
 	public void setIndexes(int index, int value) {
