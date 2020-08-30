@@ -13,11 +13,11 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 public class Player {
-	private static double SPEED = 2.5; // numbers of pixels traveled in a single move
 	private static final Dimensions dimensions = new Dimensions(40, 40);
 	private final double movementCorrectionRate = 30 / 100.0;
 	private Timeline animation;
 	
+	private double speed = 2.5; // numbers of pixels traveled in a single move
 	private String username;
 	private GameMap map;
 	private Direction previousDirection;
@@ -122,8 +122,8 @@ public class Player {
 		
 		// update position of the player according to the direction
 		Direction direction = this.direction;
-		double newX = position.getX() + direction.getX() * SPEED;
-		double newY = position.getY() + direction.getY() * SPEED;
+		double newX = position.getX() + direction.getX() * speed;
+		double newY = position.getY() + direction.getY() * speed;
 		Position newPosition = new Position(newX, newY);
 		if (isInScreen(newPosition) && noCollision(newPosition) && bombTolerant(newPosition)) {
 			bonus();
@@ -217,13 +217,13 @@ public class Player {
 	private void updateLock() { 
 		Direction direction = lockDirection;
 		if (direction == Direction.RIGHT || direction == Direction.LEFT) {
-			if (Math.abs(lockDestination.getPixelPosition().getY() - position.getY()) < SPEED) {
+			if (Math.abs(lockDestination.getPixelPosition().getY() - position.getY()) < speed) {
 				position.update(position.getX(), lockDestination.getPixelPosition().getY());
 				this.direction = lockDirection;
 				freeLock();
 			}
 		} else {
-			if (Math.abs(lockDestination.getPixelPosition().getX() - position.getX()) < SPEED) {
+			if (Math.abs(lockDestination.getPixelPosition().getX() - position.getX()) < speed) {
 				position.update(lockDestination.getPixelPosition().getX(), position.getY());
 				this.direction = lockDirection;
 				freeLock();
@@ -251,7 +251,7 @@ public class Player {
 			if (nextTile != null && nextTile.isFree()) {
 				if (direction == Direction.RIGHT || direction == Direction.LEFT) {
 					// last step of the adjustment
-					if (Math.abs(nextTile.getPixelPosition().getY() - position.getY()) < SPEED) {
+					if (Math.abs(nextTile.getPixelPosition().getY() - position.getY()) < speed) {
 						position.update(position.getX(), nextTile.getPixelPosition().getY());
 						return;
 					}
@@ -262,7 +262,7 @@ public class Player {
 						this.direction = Direction.UP;
 					}
 				} else {
-					if (Math.abs(nextTile.getPixelPosition().getX() - position.getX()) < SPEED) {
+					if (Math.abs(nextTile.getPixelPosition().getX() - position.getX()) < speed) {
 						position.update(nextTile.getPixelPosition().getX(), position.getY());
 						return;
 					}
@@ -389,11 +389,11 @@ public class Player {
 	}
 	
 	public double getSpeed() {
-		return SPEED;
+		return this.speed;
 	}
 	
 	public void setSpeed(double speed) {
-		SPEED = speed;
+		this.speed = speed;
 	}
 	
 	public void setBombsLimit(int bombsLimit) {

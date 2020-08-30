@@ -153,6 +153,9 @@ public class GameBoard {
 				if (event.getCode() == KeyCode.SPACE) {
 					mainPlayer.setDoesntWantToDrop();
 				}
+				if (event.getCode() == KeyCode.P) {
+					secondPlayer.setDoesntWantToDrop();
+				}
 			}
         });
 	}
