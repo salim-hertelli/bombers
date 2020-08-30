@@ -3,7 +3,6 @@ package bombers.control;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import bombers.model.Dimensions;
 import bombers.model.Direction;
 import bombers.model.GameMap;
 import bombers.model.Player;
@@ -25,22 +24,21 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class GameBoard {
-	private final String mapFilePath = "src/main/java/bombers/control/map.txt";
+	private final static String mapFilePath = "src/main/java/bombers/control/map.txt";
 	public final static int FPS = 60;
 	
 	private Stage primaryStage;
-	private Dimensions dimensions;
 	private Button replay;
 	private Button quit;
 	List<Player> players;
 	Player mainPlayer;
 	ViewManager viewManager;
     List<ProgressiveBomb> bombsInExplosion = new ArrayList<>();
+    Timeline timeline;
 
 	
 	public GameBoard(Stage primaryStage) {
 		GameMap map = setupGameMap();
-		this.dimensions = map.getDimensions();
 		this.primaryStage = primaryStage;
 		
 		players = new LinkedList<>();
@@ -64,7 +62,6 @@ public class GameBoard {
 
 	private GameMap setupGameMap() {
 		GameMap map = new GameMap(mapFilePath, null);
-		map.setGameBoard(this);
 		return map;
 	}
 	
@@ -125,7 +122,6 @@ public class GameBoard {
 		
 		scene.setOnKeyReleased(new EventHandler<KeyEvent> () {
 			public void handle(KeyEvent event) {
-				System.out.println(event.getCode());
 				boolean playerLocked = mainPlayer.isLocked();
 				Direction direction = (playerLocked) ? mainPlayer.getLockDirection() : mainPlayer.getDirection();
 				if (event.getCode() == KeyCode.DOWN && direction == Direction.DOWN ||
@@ -158,7 +154,7 @@ public class GameBoard {
 	private void mainLoop() {
 		// TODO make the fps change dynamically with a topFPSLimit being the constant 
 		// "MainloopIteration"ps used by the server
-		Timeline timeline = new Timeline(new KeyFrame(Duration.millis(1000 / FPS), e-> {
+		timeline = new Timeline(new KeyFrame(Duration.millis(1000 / FPS), e-> {
 			boolean allDead = true;
 			List<Player> playersToKill = new LinkedList<>();
 			for (Player player : players) {
@@ -177,13 +173,12 @@ public class GameBoard {
 				player.kill();
 				players.remove(player);
 			}
-			if(allDead) {
+			if (allDead) {
 				gameOver();
-				mainPlayer.getAnimation().stop();
+				timeline.stop();
 			}
 			viewManager.repaintAll();
 		}));
-		mainPlayer.setAnimation(timeline);
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
 	}

@@ -5,17 +5,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import bombers.view.Tile;
-import javafx.animation.Timeline;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.Window;
 
 public class Player {
 	private static final Dimensions dimensions = new Dimensions(40, 40);
-	private final double movementCorrectionRate = 30 / 100.0;
-	private Timeline animation;
+	private static final double movementCorrectionRate = 30 / 100.0;
 	
 	private double speed = 2.5; // numbers of pixels traveled in a single move
 	private String username;
@@ -24,6 +17,7 @@ public class Player {
 	private Direction direction;
 	private List<Bomb> bombs;
 	private int bombsLimit;
+	private int bombLengthOfImpact;
 	private boolean isAlive;
 	private Position position;
 	private AtomicBoolean wantsToDrop = new AtomicBoolean(false);
@@ -32,7 +26,6 @@ public class Player {
 	private List<Tile> allowedBombTiles;
 	private boolean hasJump;
 	private Position blockJump;
-	private int bombLengthOfImpact;
 	
 	public Player(String username, GameMap map, Position startPosition) {
 		this.bombLengthOfImpact = 1;
@@ -64,7 +57,7 @@ public class Player {
 		if (direction != lockDirection) {
 			freeLock();
 			previousDirection = this.direction;
-			if(blockJump == null)
+			if (blockJump == null)
 				this.direction = direction;
 			if (direction == Direction.REST) {
 				adjustPosition();
@@ -408,23 +401,14 @@ public class Player {
 		hasJump = jump;
 	}
 	
-	public Timeline getAnimation() {
-		return animation;
-	}
-	
-	public void setAnimation(Timeline animation) {
-		this.animation = animation;
-	}
-	
 	public void kill() {
-		for (Bomb bomb : bombs) {
-			bomb.remove();
-		}
 		if (hasJump())
 			setJump(false);
-		else
+		else {
 			isAlive = false;
+			for (Bomb bomb : bombs) {
+				bomb.remove();
+			}
+		}
 	}
-	
-	
 }

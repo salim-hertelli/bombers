@@ -1,6 +1,6 @@
 package bombers.model;
 
-import java.io.IOException; 
+import java.io.IOException;  
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import bombers.control.GameBoard;
 import bombers.view.Tile;
 
 /*
@@ -18,13 +17,12 @@ import bombers.view.Tile;
  * accessible via getters and setters
  */
 public class GameMap {
-	private final Dimensions teilDimensions = new Dimensions(40,40);
-	private Tile[][] tiles;
+	private final Dimensions tileDimensions = new Dimensions(40,40);
 	private Dimensions dimensions; // dimensions of the map
+	private Tile[][] tiles;
 	private int xNumber; // number of tiles in a line
 	private int yNumber; // number of tiles in a column
 	private List<Player> players;
-	private GameBoard gameBoard;
 	
 	public GameMap(String fileName, List<Player> players) {
 		this(fileName, players, false);
@@ -36,11 +34,12 @@ public class GameMap {
 			lines = Files.readAllLines(Paths.get(fileName));
 		} catch (IOException e) {
 			e.printStackTrace();
+			System.exit(0);
 		}
 
 		yNumber = lines.size();
 		xNumber = lines.get(0).length();
-		System.out.println(xNumber +" "+ yNumber);
+		System.out.println("Dimensions: " + xNumber + " " + yNumber);
 		this.dimensions = new Dimensions(xNumber * getTileWidth(), yNumber * getTileHeight());
 
 		generateTiles(lines);
@@ -82,9 +81,9 @@ public class GameMap {
 				}
 			}
 		}
-		
-		
-		// this loop count the number of the reachable tiles from (0,0)
+
+
+		// this loop count the number of the reachable tiles starting from (0,0)
 		Set<Tile> markedTiles = new HashSet<>();
 		List<Tile> toCheck = new LinkedList<>();
 		Tile firstTile = tiles[0][0];
@@ -107,7 +106,7 @@ public class GameMap {
 		
 		return totalNumber == reachableNumber;
 	}
-	
+
 	public void setPlayers(List<Player> players) {
 		this.players = players;
 	}
@@ -116,21 +115,22 @@ public class GameMap {
 		return players;
 	}
 	
-	private TileType interpretTileTypeFromChar(char c) {
+	private static TileType interpretTileTypeFromChar(char c) {
 		switch(c) {		
 			case 'W': return TileType.WALL;
 			case 'F': return TileType.FREE;
 			case 'O': return TileType.OBSTACLE;
-			default: throw new IllegalArgumentException("Character not allowed in the game map file");
+			default: System.err.println("Character not allowed in the game map file: " + c);
+					System.exit(0); return null;
 		}
 	}
 
 	public int getTileHeight() {
-		return teilDimensions.getHeight();
+		return tileDimensions.getHeight();
 	}
 
 	public int getTileWidth() {
-		return teilDimensions.getWidth();
+		return tileDimensions.getWidth();
 	}
 	
 	public Dimensions getTileDimensions() {
@@ -153,10 +153,6 @@ public class GameMap {
 	}
 	
 	private void generateTiles(List<String> lines) {
-		System.out.println(lines.size());
-		System.out.println(lines.get(0).length());
-		System.out.println(xNumber);
-		System.out.println(yNumber);
 		tiles = new Tile[yNumber][xNumber];
 		for (int j = 0; j < yNumber; j++) {
 			String currentLine = lines.get(j);
@@ -229,9 +225,5 @@ public class GameMap {
 			}
 		}
 		return result;
-	}
-	
-	public void setGameBoard(GameBoard gB) {
-		gameBoard = gB;
 	}
 }

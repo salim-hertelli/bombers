@@ -3,20 +3,15 @@ package bombers.view;
 import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.Random;
 
 import bombers.model.Bomb;
 import bombers.model.Dimensions;
 import bombers.model.GameMap;
-import bombers.model.Player;
 import bombers.model.Position;
 import bombers.model.TileType;
 import bombers.model.supplies.Bonus;
 import bombers.model.supplies.ExtraBomb;
-import bombers.model.supplies.Jumper;
 import bombers.model.supplies.LongerBomb;
-import bombers.model.supplies.Nitro;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
@@ -53,8 +48,6 @@ public class Tile {
 		}
 	}
 	
-	private List<Class<? extends Bonus>> supplies = Arrays.asList(bombers.model.supplies.ExtraBomb.class, 
-			bombers.model.supplies.Nitro.class);
 	private GraphicsContext gc;
 	private Dimensions dimensions;
 	private Position pixelPosition; // this is the usual position
@@ -175,11 +168,11 @@ public class Tile {
 		if (tileType == TileType.WALL) {
 			image = wallImage;
 		} else if (tileType == TileType.FREE) {
-			if(!isExploding)
+			if (!isExploding) {
 				image = freeImage;
-			else {
+			} else {
 				image = explosionImage[explosionPhase++];
-				if(explosionPhase == 9) {
+				if (explosionPhase == 9) {
 					setExploding(false);
 					explosionPhase = 0;
 				}

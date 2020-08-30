@@ -11,7 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 
 public class ViewManager {
-	private final static String PLAYER_FILE_PATH = "src/main/java/bombers/view/player2.png";
+	private final static String PLAYER_FILE_PATH = "src/main/java/bombers/view/player.png";
 	
 	private static Image playerImage;
 	

@@ -1,10 +1,8 @@
 package bombers.model;
 
-import java.util.ArrayList; 
+import java.util.ArrayList;
 import java.util.List;
 
-import bombers.model.supplies.Bonus;
-import bombers.model.supplies.ExtraBomb;
 import bombers.view.Tile;
 
 public class ProgressiveBomb extends Bomb{
