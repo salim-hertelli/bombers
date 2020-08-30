@@ -100,7 +100,6 @@ public class Player {
 		// If key was pressed player drops a bomb
 		if (wantsToDrop.get()) {
 			dropBomb();
-			wantsToDrop.set(false);
 		}
 		
 		// update (and explode) bombs
@@ -351,6 +350,10 @@ public class Player {
 	
 	public void setWantsToDrop() {
 		wantsToDrop.set(true);
+	}
+	
+	public void setDoesntWantToDrop() {
+		wantsToDrop.set(false);
 	}
 
 	public void addAllowedBombedTile(Tile tile) {

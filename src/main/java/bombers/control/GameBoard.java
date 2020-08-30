@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import com.sun.media.jfxmedia.events.PlayerTimeListener;
+
 import bombers.model.Dimensions;
 import bombers.model.Direction;
 import bombers.model.GameMap;
@@ -49,7 +51,7 @@ public class GameBoard {
 		
 		players = new LinkedList<>();
 		mainPlayer = new Player("grnvs", map, new Position(0, 0));
-		Player secondPlayer = new Player("second", map, new Position(120, 0));
+		Player secondPlayer = new Player("second", map, new Position(map.getDimensions().getWidth() - map.getTileWidth(), 0));
 		players.add(mainPlayer);
 		players.add(secondPlayer);
 		map.setPlayers(players);
@@ -147,6 +149,10 @@ public class GameBoard {
 						event.getCode() == KeyCode.Q && secondDirection == Direction.LEFT) {
 					secondPlayer.setDirection(Direction.REST);
 				}
+				
+				if (event.getCode() == KeyCode.SPACE) {
+					mainPlayer.setDoesntWantToDrop();
+				}
 			}
         });
 	}
@@ -160,12 +166,18 @@ public class GameBoard {
 			//We should get the position from other players irgendwie
 			
 			// now after all the bombs got updated check which players died
+			List<Player> playersToKill = new LinkedList<>();
 			for(Player player : players) {
 				player.move();
+				System.out.println(player.isAlive());
 				if (!player.isAlive()) 
-					players.remove(player);
+					playersToKill.add(player);
 				else
 					allDead = false;
+			}
+			for (Player player : playersToKill) {
+				player.kill();
+				players.remove(player);
 			}
 			if(allDead) {
 				gameOver();

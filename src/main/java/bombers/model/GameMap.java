@@ -38,7 +38,7 @@ public class GameMap {
 			e.printStackTrace();
 		}
 
-		yNumber = lines.size()-1;
+		yNumber = lines.size();
 		xNumber = lines.get(0).length();
 		System.out.println(xNumber +" "+ yNumber);
 		this.dimensions = new Dimensions(xNumber * getTileWidth(), yNumber * getTileHeight());
@@ -153,6 +153,10 @@ public class GameMap {
 	}
 	
 	private void generateTiles(List<String> lines) {
+		System.out.println(lines.size());
+		System.out.println(lines.get(0).length());
+		System.out.println(xNumber);
+		System.out.println(yNumber);
 		tiles = new Tile[yNumber][xNumber];
 		for (int j = 0; j < yNumber; j++) {
 			String currentLine = lines.get(j);
