@@ -3,10 +3,6 @@ package bombers.control;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-
-import com.sun.media.jfxmedia.events.PlayerTimeListener;
-
 import bombers.model.Dimensions;
 import bombers.model.Direction;
 import bombers.model.GameMap;
@@ -15,7 +11,6 @@ import bombers.model.Position;
 import bombers.model.ProgressiveBomb;
 import bombers.view.ViewManager;
 import javafx.animation.Animation;
-import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
@@ -25,7 +20,6 @@ import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -51,7 +45,8 @@ public class GameBoard {
 		
 		players = new LinkedList<>();
 		mainPlayer = new Player("grnvs", map, new Position(0, 0));
-		Player secondPlayer = new Player("second", map, new Position(map.getDimensions().getWidth() - map.getTileWidth(), 0));
+		Player secondPlayer = new Player("second", map, new Position(map.getDimensions().getWidth() 
+				- map.getTileWidth(), 0));
 		players.add(mainPlayer);
 		players.add(secondPlayer);
 		map.setPlayers(players);
@@ -161,22 +156,22 @@ public class GameBoard {
 	}
 	
 	private void mainLoop() {
-		// TODO make the fps change dynamically with a topFPSLimit being the constant "MainloopIteration"ps used by the server
+		// TODO make the fps change dynamically with a topFPSLimit being the constant 
+		// "MainloopIteration"ps used by the server
 		Timeline timeline = new Timeline(new KeyFrame(Duration.millis(1000 / FPS), e-> {
 			boolean allDead = true;
-			// each player updates his bombs during his move
-			// thus the main loop does not explicitly update the bombs
-			//We should get the position from other players irgendwie
-			
-			// now after all the bombs got updated check which players died
 			List<Player> playersToKill = new LinkedList<>();
-			for(Player player : players) {
+			for (Player player : players) {
+				// each player updates his bombs during his move
+				// thus the main loop does not explicitly update the bombs
 				player.move();
-				System.out.println(player.isAlive());
-				if (!player.isAlive()) 
+				// TODO: I think this verification should erst be made after all players have been moved
+				if (!player.isAlive()) {					
 					playersToKill.add(player);
-				else
+				}
+				else {					
 					allDead = false;
+				}
 			}
 			for (Player player : playersToKill) {
 				player.kill();

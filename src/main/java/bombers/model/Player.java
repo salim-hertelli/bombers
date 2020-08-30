@@ -420,7 +420,7 @@ public class Player {
 		for (Bomb bomb : bombs) {
 			bomb.remove();
 		}
-		if(hasJump())
+		if (hasJump())
 			setJump(false);
 		else
 			isAlive = false;

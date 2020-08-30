@@ -42,7 +42,7 @@ public class ProgressiveBomb extends Bomb{
 		for (int j : indexes) {
 			if (j >= 0 && toDestroy[j] != null) {
 				Tile t = toDestroy[j];
-				for (Player player : map.getPlayersAtTile(t)) 
+				for (Player player : map.getPlayersAtTile(t))
 					player.kill();
 				if (t.getTileType().blocksBombPropagation())
 					indexes.set(indexes.indexOf(j), -1);
@@ -69,7 +69,7 @@ public class ProgressiveBomb extends Bomb{
 		if(tile.getGridPosition().getY() > this.getTile().getGridPosition().getY()) {
 			bomb.setIndexes(3, -1);
 			indexes.set(1, -1);
-		}else {
+		} else {
 			bomb.setIndexes(1, -1);
 			indexes.set(3, -1);
 		}
@@ -82,7 +82,7 @@ public class ProgressiveBomb extends Bomb{
 		if(tile.getGridPosition().getX() > this.getTile().getGridPosition().getX()) {
 			bomb.setIndexes(0, -1);
 			indexes.set(2, -1);
-		}else {
+		} else {
 			bomb.setIndexes(2, -1);
 			indexes.set(0, -1);
 		}		
