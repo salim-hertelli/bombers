@@ -1,14 +1,43 @@
 package bombers.model;
 
+import java.io.FileInputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import bombers.control.GameBoard;
 import bombers.view.Tile;
+import javafx.scene.image.Image;
 
 public class Player {
+	private static final String PLAYER_IMAGES_PATH = "src/main/java/bombers/view/";
 	private static final Dimensions dimensions = new Dimensions(40, 40);
 	private static final double movementCorrectionRate = 30 / 100.0;
+	private static final int imageSwitchFrequency = GameBoard.FPS / 8; // 3 switches per second
+	
+	private static final Image[] rightImages = new Image[4];
+	private static final Image[] backImages = new Image[3];
+	private static final Image[] frontImages = new Image[3];
+	private static final Image[] leftImages = new Image[4];
+	
+	static {
+		try {
+			for (int i = 0; i < rightImages.length; i++) {
+				rightImages[i] = new Image(new FileInputStream(PLAYER_IMAGES_PATH + "right-" + i + ".png"));
+			}
+			for (int i = 0; i < leftImages.length; i++) {
+				leftImages[i] = new Image(new FileInputStream(PLAYER_IMAGES_PATH + "left-" + i + ".png"));
+			}
+			for (int i = 0; i < frontImages.length; i++) {
+				frontImages[i] = new Image(new FileInputStream(PLAYER_IMAGES_PATH + "front-" + i + ".png"));
+			}
+			for (int i = 0; i < backImages.length; i++) {
+				backImages[i] = new Image(new FileInputStream(PLAYER_IMAGES_PATH + "back-" + i + ".png"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 	private double speed = 2.5; // numbers of pixels traveled in a single move
 	private String username;
@@ -26,8 +55,13 @@ public class Player {
 	private List<Tile> allowedBombTiles;
 	private boolean hasJump;
 	private Position blockJump;
+	private Direction lastActiveDirection; // last direction different from REST
+	private int imageCounter;
+	private int imageSwitchCounter = 0;
 	
 	public Player(String username, GameMap map, Position startPosition) {
+		this.imageCounter = 0;
+		this.lastActiveDirection = Direction.DOWN;
 		this.bombLengthOfImpact = 1;
 		this.direction = Direction.REST;
 		this.previousDirection = Direction.REST;
@@ -57,8 +91,9 @@ public class Player {
 		if (direction != lockDirection) {
 			freeLock();
 			previousDirection = this.direction;
-			if (blockJump == null)
+			if (blockJump == null) {				
 				this.direction = direction;
+			}
 			if (direction == Direction.REST) {
 				adjustPosition();
 			}
@@ -399,6 +434,38 @@ public class Player {
 	
 	public void setJump(boolean jump) {
 		hasJump = jump;
+	}
+	
+	public Image getImage() {
+		Direction currentDirection = getDirection();
+		if (currentDirection != lastActiveDirection) {
+			imageCounter = 0;
+			imageSwitchCounter = imageSwitchFrequency - 1;
+		}
+		if (currentDirection != Direction.REST) {
+			imageSwitchCounter++;
+			lastActiveDirection = currentDirection;
+			Image[] images = getImagesArrayAccordingToDirection(currentDirection);
+			if (imageSwitchCounter == imageSwitchFrequency) {
+				imageCounter = (imageCounter + 1 < images.length) ? imageCounter + 1 : 0;
+				imageSwitchCounter = 0;
+			}
+			return images[imageCounter];
+		} else {
+			// use lastActiveDirection
+			Image[] images = getImagesArrayAccordingToDirection(lastActiveDirection);
+			return images[0];
+		}
+	}
+	
+	private static Image[] getImagesArrayAccordingToDirection(Direction direction) {
+		switch (direction) {
+			case UP: return backImages;
+			case DOWN: return frontImages;
+			case RIGHT: return rightImages;
+			case LEFT: return leftImages;
+			default: return null;
+		}
 	}
 	
 	public void kill() {

@@ -11,18 +11,6 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 
 public class ViewManager {
-	private final static String PLAYER_FILE_PATH = "src/main/java/bombers/view/player.png";
-	
-	private static Image playerImage;
-	
-	static {
-		try {
-			playerImage = new Image(new FileInputStream(PLAYER_FILE_PATH));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
     GameMap map;
     Scene scene;
     private GraphicsContext gc;
@@ -60,9 +48,8 @@ public class ViewManager {
 			tile.paint();
 		}
 		for (Player player : players) {
-			gc.drawImage(playerImage, player.getPosition().getX(), player.getPosition().getY());
+			gc.drawImage(player.getImage(), player.getPosition().getX(), player.getPosition().getY());
 		}
-		//TODO: paints all tiles
 	}
 	
 	public static void main(String[] args) {
